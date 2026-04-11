@@ -1,82 +1,141 @@
-@use '~/styles/variables' as var;
-@use 'sass:color';
+// side-bars.scss
 
-:global {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100dvh;
-    background-color: var.$primary-color;
-    padding: 2rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    z-index: 1000;
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100dvh;
+  background-color: var.$primary-color;
+  z-index: 2000;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  overflow-x: hidden;
 
-    &.is-open {
-      transform: translateX(0);
-    }
+  // Ocultar scrollbar en todos los navegadores
+  scrollbar-width: none;        // Firefox
+  -ms-overflow-style: none;     // IE/Edge
+  &::-webkit-scrollbar {
+    display: none;               // Chrome/Safari
   }
 
-  .sidebar-nav ul {
+  &.is-open {
+    transform: translateX(0);
+  }
+}
+
+.close-button {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: var.$secondary-color;
+  font-size: 2.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ul {
     list-style: none;
     padding: 0;
+    margin-top: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    
-    li {
+    gap: 1rem;
+  }
+}
+
+.sidebar .menu-button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  background-color: var.$secondary-color;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+// Footer del sidebar — copiado del .main-footer
+.sidebar-footer {
+  background-color: var.$primary-color;
+  color: var.$secondary-color;
+  font-size: 0.9em;
+  font-weight: 600;
+  padding: 1rem 0;
+  margin-top: auto;        // empuja el footer hacia abajo
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+
+  .social-links {
+    display: flex;
+    gap: 1em;
+
+    a {
       display: flex;
       justify-content: center;
-    }
-  }
+      align-items: center;
+      width: 2.5em;
+      height: 2.5em;
+      background-color: var.$secondary-color;
+      color: var.$light-color;
+      border-radius: 50%;
+      text-decoration: none;
+      transition: transform 0.2s ease-in-out;
 
-  // Estilo específico para el MenuButton cuando está dentro de la Sidebar
-  .sidebar .menu-button {
-    width: 100%;
-    background-color: var.$secondary-color;
-    color: #b3ffb3;
-    padding: 0.8rem;
-    border-radius: 8px;
-    text-align: center;
-    text-decoration: none;
-    font-weight: bold;
-
-    &:hover {
-      background-color: color.adjust(var.$secondary-color, $lightness: 10%);
-    }
-  }
-
-  .sidebar-footer {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    
-    .social-links {
-      display: flex;
-      gap: 1rem;
-      
-      a {
-        width: 44px;
-        height: 44px;
-        background-color: var.$secondary-color;
-        color: var.$primary-color;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        svg { width: 24px; height: 24px; }
+      &:hover {
+        transform: scale(1.1);
       }
     }
-    
-    span {
-        color: var.$secondary-color;
-        font-weight: bold;
+  }
+
+  span {
+    color: var.$secondary-color;
+    font-size: 0.85em;
+
+    &:hover {
+      text-decoration: underline;
+      cursor: pointer;
     }
+  }
+}
+
+.close-button {
+  align-self: flex-end;
+  background-color: #ff4757;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #c0392b;
+    transform: scale(1.1);
   }
 }

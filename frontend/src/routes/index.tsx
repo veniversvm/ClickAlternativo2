@@ -29,9 +29,9 @@ export default function Home() {
          internos nada más entrar.
       */}
       <section class="latest-feed container mx-auto p-4">
-        <h2 class="text-2xl font-bold mb-6 border-b border-[#6BBF5B] pb-2">
+        {/* <h2 class="text-2xl font-bold mb-6 border-b border-[#6BBF5B] pb-2">
           Últimas Curadurías
-        </h2>
+        </h2> */}
         
         <Suspense fallback={<p class="text-center">Cargando sugerencias...</p>}>
           <SearchResults results={latestPosts()?.results} />

@@ -1,17 +1,20 @@
-// .logo-container {
-//     // height: 30vh;
-//     max-width: 100%;
-// }
-@use '~/styles/variables' as var;
+.logo-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
 .logo {
-    height: 30vh;
-    width: 100%;
-    margin-top: 1.2rem;
+  width: 60%;        // ocupa el 60% del contenedor en mobile
+  max-width: 320px;  // pero nunca más de 320px
+  height: auto;      // mantiene proporción
+  margin-top: 1.2rem;
+  object-fit: contain;
 }
 
 @media (min-width: 768px) {
-    .logo{
-        margin-top: 1.5rem;
-    }
+  .logo {
+    width: 40%;
+    margin-top: 1rem;
+  }
 }

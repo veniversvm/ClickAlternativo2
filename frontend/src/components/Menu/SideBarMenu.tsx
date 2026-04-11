@@ -1,22 +1,21 @@
-import { For, Show } from "solid-js";
-import { SiInstagram, SiYoutube } from "solid-icons/si";
-import MenuButton from "../Button/MenuButton"; // Ajusta ruta
+// frontend/src/components/Menu/SideBarMenu.tsx
+import { For } from "solid-js";
+import { A } from "@solidjs/router";
 import { navLinks } from "~/data/navigation";
-import "./side-bars.scss"; 
+import MenuButton from "../Button/MenuButton";
 
-interface SidebarProps {
+export default function SideBarMenu(props: {
   isOpen: boolean;
   onClose: () => void;
-}
-
-export default function Sidebar(props: SidebarProps) {
+}) {
   return (
-    <aside 
+    <aside
+      id="sidebar-menu"
       class="sidebar"
-      classList={{ "is-open": props.isOpen }} 
+      classList={{ "is-open": props.isOpen }}
     >
       <div class="sidebar-header">
-        <button class="close-button" onClick={props.onClose} aria-label="Cerrar menú">
+        <button class="close-button" onClick={props.onClose}>
           ×
         </button>
       </div>
@@ -24,14 +23,17 @@ export default function Sidebar(props: SidebarProps) {
       <nav class="sidebar-nav">
         <ul>
           <li>
-            <MenuButton href="/" onClick={props.onClose}>INICIO</MenuButton>
+            <MenuButton href="/" onClick={props.onClose}>
+              INICIO
+            </MenuButton>
           </li>
+          {/* NavLinks debe renderizar <li> internamente, o envuelves aquí */}
           <For each={navLinks}>
-            {(link) => (
+            {(link: { href: any; text: any; }) => (
               <li>
-                <MenuButton href={link.href} onClick={props.onClose}>
+                <A href={link.href} class="menu-button" onClick={props.onClose}>
                   {link.text}
-                </MenuButton>
+                </A>
               </li>
             )}
           </For>
@@ -40,11 +42,11 @@ export default function Sidebar(props: SidebarProps) {
 
       <footer class="sidebar-footer">
         <div class="social-links">
-          <a href="https://instagram.com/Click_Alternativo" target="_blank" aria-label="Instagram">
-            <SiInstagram />
+          <a href="#" aria-label="Instagram">
+            IG
           </a>
-          <a href="https://youtube.com/@Click_Alternativo" target="_blank" aria-label="YouTube">
-            <SiYoutube />
+          <a href="#" aria-label="YouTube">
+            YT
           </a>
         </div>
         <span>@Click_Alternativo</span>
