@@ -1,0 +1,125 @@
+// src/components/footer/footer.scss
+
+@use '~/styles/variables' as var;
+@use 'sass:color';
+
+/* ================================== */
+/*  ESTILOS BASE (MOBILE-FIRST)       */
+/* ================================== */
+// Estos estilos se aplican a TODOS los tamaños de pantalla, empezando por el más pequeño.
+
+// ...
+.main-footer {
+  background-color: var.$primary-color;
+  width: 100%;
+  padding: 0rem 1rem; // <-- Esto añade espacio vertical
+  color: var.$secondary-color;
+  font-size: 0.5rem;
+  box-sizing: border-box;
+  font-weight: 600;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  // gap: 1rem; // <-- Este gap también aumenta la altura total
+  justify-content: space-between;
+}
+
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  // gap: 0.75rem; // Espacio entre elementos de cada sección (ej: iconos y @handle)
+}
+
+.social-icons {
+  display: flex;
+  gap: 1em;
+
+  a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.5em; 
+    height: 2.5em;
+    background-color: var.$secondary-color;
+    color: var.$light-color;
+    border-radius: 50%;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    [data-icon] {
+      font-size: 1.25em;
+    }
+  }
+}
+
+.social-handle,
+.footer-info a,
+.footer-info p {
+  color: var.$secondary-color;
+  text-decoration: none;
+}
+
+.footer-info a:hover,
+.social-handle:hover {
+  text-decoration: underline;
+}
+
+.copyright {
+  font-size: 0.9em;
+  opacity: 0.9;
+  margin: 0; // Añadimos esto para controlar mejor el espaciado
+}
+
+.footer-support {
+  p {
+    margin-bottom: 0.5em;
+    font-size: 0.7rem;
+  }
+}
+
+.support-button {
+  background-color: #1E1E1E;
+  color: var.$light-color;
+  padding: 0.75em 1.5em;
+  border-radius: 4px;
+  font-weight: bold;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+  margin-bottom: 0.2em;
+
+  &:hover {
+    background-color: color.adjust(var.$dark-bg, $lightness: 10%);
+  }
+}
+
+/* ======================================= */
+/*  ESTILOS PARA ESCRITORIO (TABLET Y MÁS) */
+/* ======================================= */
+// Estos estilos se AÑADEN a los de móvil cuando la pantalla es más ancha de 768px.
+
+@media (min-width: 769px) {
+  .main-footer {
+    // --- Cambiamos el layout a horizontal ---
+    flex-direction: row;
+    justify-content: space-around;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    min-height: 7vh; // Podemos reintroducir una altura mínima para desktop si queremos
+    font-size: 1em;
+  }
+
+  // Alineamos la primera columna a la izquierda
+  .footer-social {
+    align-items: flex-start;
+  }
+}
+
+

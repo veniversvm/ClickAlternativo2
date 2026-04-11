@@ -1,0 +1,57 @@
+@use '~/styles/variables' as var;
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 1.5rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .main-logo {
+    width: 100%;
+    max-width: 300px; // Ajusta según tu logo real
+    height: auto;
+    margin-bottom: 2rem;
+  }
+
+  #initial-message {
+    font-family: var.$font-family-body-pc;
+    font-size: 1.25rem;
+    color: #e0e0e0;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+    max-width: 500px;
+    // Un toque de estilo sutil para el mensaje
+    border-left: 3px solid var.$primary-color;
+    padding-left: 1rem;
+  }
+}
+
+// Media query para PC
+@media (min-width: 992px) {
+  .welcome-content {
+    padding: 6rem 2rem;
+    
+    #initial-message {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+
+.loading-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  opacity: 0.6;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}

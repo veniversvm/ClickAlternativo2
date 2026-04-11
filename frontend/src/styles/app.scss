@@ -1,0 +1,14 @@
+@use "~/styles/variables" as var;
+
+@import "~/styles/normalize.css";
+@import "~/styles/global.scss";
+@import "~/styles/layout.scss";
+
+// Revisa que los nombres coincidan exactamente con tu disco (mayúsculas/minúsculas)
+@import "~/components/Welcome/Welcome.scss";
+@import "~/components/PostCard/PostCard.scss";
+@import "~/components/Footer/footer.scss";       
+@import "~/components/Menu/side-bars.scss";     
+@import "~/components/SearchBar/SearchBar.scss";
+@import "~/components/SearchResults/SearchResults.scss";
+@import "~/components/Navigation/PostNavigation.scss";

@@ -1,0 +1,119 @@
+@use '~/styles/variables' as var;
+
+/* ======================================================
+   FAQ — estilos replicando la estética del About Us
+   ====================================================== */
+
+#section-faq {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: var.$light-color;
+  font-family: var.$font-family;
+  line-height: 1.6;
+
+  /* ===== HEADER ===== */
+  .section-faq__header {
+    margin-bottom: 2.5rem;
+    text-align: center;
+
+    .section-faq__title {
+      font-size: 2.2rem;
+      color: var.$primary-color;
+      margin-bottom: 0.75rem;
+      line-height: 1.05;
+    }
+
+    .section-faq__intro {
+      font-size: 1.1rem;
+      max-width: 900px;
+      margin: 0 auto;
+      color: rgba(255, 255, 255, 0.9); // ligera suavización
+    }
+  }
+
+  /* ===== CONTENIDO ===== */
+  .section-faq__container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section-faq__item {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-faq__question {
+    font-size: 1.6rem;
+    color: var.$primary-color;
+    margin-bottom: 1rem;
+    border-left: 4px solid var.$primary-color;
+    padding-left: 0.5rem;
+  }
+
+  .section-faq__answer {
+    margin-bottom: 1rem;
+    color: var.$light-color;
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+
+  /* ===== LISTAS (si las hubiese) ===== */
+  .section-faq__list {
+    list-style: none;
+    padding-left: 0;
+
+    .section-faq__list-item {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.75rem;
+
+      &::before {
+        content: '✔';
+        position: absolute;
+        left: 0;
+        color: var.$primary-color;
+      }
+    }
+  }
+
+  /* ===== Resaltados (usar en spans en HTML) ===== */
+  .text-highlight {
+    color: #5e9653;
+    font-weight: 700;
+  }
+
+  .text-highlight-default {
+    color: #ffcc00; // amarillo
+    font-weight: 700;
+  }
+
+  .text-highlight-danger {
+    color: #ff4d4d; // rojo
+    font-weight: 700;
+  }
+
+  .text-highlight-success {
+    color: #5e9653; // verde (coherente con el look)
+    font-weight: 700;
+  }
+
+  .text-highlight-info {
+    color: #2196f3; // azul
+    font-weight: 700;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (min-width: 768px) {
+  #section-faq {
+    padding: 3rem 2rem;
+
+    .section-faq__header .section-faq__title {
+      font-size: 2.8rem;
+    }
+
+    .section-faq__question {
+      font-size: 1.8rem;
+    }
+  }
+}

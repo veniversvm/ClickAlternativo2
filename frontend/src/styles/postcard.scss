@@ -1,0 +1,119 @@
+// src/styles/postcard.scss
+@use './variables' as var;
+@use 'sass:color';
+
+:global {
+  .post-card {
+    display: flex;
+    gap: 1rem;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: #555;
+    }
+  }
+
+  .card-image-link {
+    flex-shrink: 0;
+  }
+
+  .card-image,
+  .image-placeholder {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #333;
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-title-link {
+    text-decoration: none;
+
+    h2 {
+      font-size: 1.25rem;
+      margin: 0 0 0.5rem 0;
+      color: var.$primary-color;
+      transition: color 0.2s ease;
+    }
+
+    &:hover h2 {
+      color: color.adjust(var.$primary-color, $lightness: 15%);
+    }
+  }
+
+  .card-content p {
+    font-size: 0.9rem;
+    color: #ccc;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .card-content time {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 0.5rem;
+  }
+
+  .external-link-wrapper {
+    margin-top: 0.75rem;
+  }
+
+  .external-button {
+    display: inline-block;
+    background-color: #333;
+    color: var.$primary-color;
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: 1px solid #555;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background-color: var.$primary-color;
+      color: #121212;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .post-card {
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .card-image,
+    .image-placeholder {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .card-title-link h2 {
+      font-size: 1.5rem;
+    }
+
+    .card-content p {
+      font-size: 1rem;
+    }
+
+    .card-content time {
+      font-size: 0.875rem;
+    }
+  }
+}

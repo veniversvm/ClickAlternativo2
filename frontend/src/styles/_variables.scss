@@ -1,0 +1,16 @@
+//_variables.scss
+
+// BASE
+$primary-color: #6BBF5B;
+$secondary-color: #1E1E1E;
+$light-color: #ffffff;
+$dark-bg: #333333;
+
+// TIPOGRAFÍA
+$font-family-display: 'Anton', sans-serif;
+$font-family-body-pc: 'Poppins', sans-serif;
+
+// 2. --- ¡AQUÍ ESTÁ LA MAGIA! ---
+//    Redefinimos la variable que ya usas en todas partes.
+//    En lugar de un valor estático, ahora contiene una llamada a una variable CSS.
+$font-family: var(--font-family-base);

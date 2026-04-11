@@ -1,0 +1,82 @@
+@use '~/styles/variables' as var;
+@use 'sass:color';
+
+:global {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100dvh;
+    background-color: var.$primary-color;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+
+    &.is-open {
+      transform: translateX(0);
+    }
+  }
+
+  .sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    
+    li {
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  // Estilo específico para el MenuButton cuando está dentro de la Sidebar
+  .sidebar .menu-button {
+    width: 100%;
+    background-color: var.$secondary-color;
+    color: #b3ffb3;
+    padding: 0.8rem;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+
+    &:hover {
+      background-color: color.adjust(var.$secondary-color, $lightness: 10%);
+    }
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      
+      a {
+        width: 44px;
+        height: 44px;
+        background-color: var.$secondary-color;
+        color: var.$primary-color;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        svg { width: 24px; height: 24px; }
+      }
+    }
+    
+    span {
+        color: var.$secondary-color;
+        font-weight: bold;
+    }
+  }
+}

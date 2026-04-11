@@ -1,0 +1,55 @@
+@use '~/styles/variables' as var;
+
+  .post-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem 0;
+    /* Quitamos el borde superior para que se integre mejor en la columna visual */
+  }
+
+  /* --- CAMBIO 3: Renombramos .back-button a .center-button para más claridad --- */
+  .center-button {
+    background-color: var.$primary-color;
+    color: #121212;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none; /* Para el caso de que sea un <a> */
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    text-align: center; /* Asegura que el texto esté centrado */
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  .arrow-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: var.$primary-color;
+    border-radius: 50%;
+    color: #121212;
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &.disabled {
+      background-color: #3a3a3a;
+      cursor: not-allowed;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }

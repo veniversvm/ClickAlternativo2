@@ -1,0 +1,31 @@
+@use 'sass:color';
+@use '~/styles/variables' as var;
+
+.no-results {
+  color: #ccc;
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 2rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  margin-top: 2rem;
+}
+
+/* --- Grilla de Posts (Responsiva) --- */
+.posts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .posts-grid {
+    display: grid;
+    // Esto crea columnas automáticas que se ajustan al ancho de la pantalla
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+}

@@ -1,0 +1,162 @@
+// Copia y pega TODO este bloque en tu <style lang="scss">
+
+@use './variables' as var;
+
+/* ESTILOS BASE (MOBILE-FIRST) */
+.blog-post {
+  max-width: 800px;
+  width: 90%;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid var.$primary-color;
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+  font-family: "instrument sans";
+}
+
+.tags-container { 
+  display: none; 
+}
+
+.post-header { 
+  text-align: center; 
+  margin-bottom: 2rem; 
+  border-bottom: 2px solid var.$primary-color; 
+  padding-bottom: 1.5rem; 
+}
+
+.post-title { 
+  font-size: 2.5rem; 
+  color: var.$light-color; 
+  margin-bottom: 0.5rem; 
+  line-height: 1.2; 
+}
+
+.post-meta { 
+  font-size: 0.9rem; 
+  color: #ccc; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 0.5rem; 
+  margin-top: 1rem; 
+}
+
+.post-content { 
+  color: #e0e0e0; 
+  line-height: 1.7; 
+  h1, h2, h3 { 
+    color: var.$light-color; 
+    border-bottom: 1px solid #444; 
+    padding-bottom: 0.5rem; 
+    margin-top: 2rem; 
+  } 
+}
+
+/* --- ESTILOS PARA LOS BOTONES (UNIFICADOS) --- */
+.visit-link-container,
+.back-button-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.visit-link-container {
+  margin-top: 2rem; /* El primer botón tiene un margen superior mayor */
+}
+
+/* Regla compartida para que ambos botones se vean idénticos */
+.visit-button,
+.back-button {
+  display: inline-block;
+  background-color: var.$primary-color; /* Usando tu variable de color primario */
+  color: #121212; /* Texto oscuro para buen contraste */
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none; /* Aseguramos que el <button> no tenga borde por defecto */
+  font-family: inherit; /* Hacemos que el <button> herede la fuente */
+  font-size: 1rem; /* Unificamos el tamaño de fuente */
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: auto;
+  min-width: 200px; /* Un ancho mínimo para que se vean consistentes */
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(var.$primary-color, 0.4);
+  }
+}
+
+/* MEDIA QUERY PARA TABLET Y PC (992px+) */
+@media (min-width: 992px) {
+  .blog-post { 
+    display: flex; 
+    flex-direction: row; 
+    align-items: flex-start; 
+    gap: 2.5rem; 
+    max-width: 1200px; 
+    padding: 2.5rem; 
+  }
+  
+  .post-column-visual { 
+    flex: 0 0 45%; 
+    position: sticky; 
+    top: 2rem; 
+  }
+
+  .post-column-text { 
+    flex: 1; 
+  }
+  
+  .tags-container { 
+    display: block; 
+    text-align: center; 
+    margin-top: 2rem; 
+    
+    h3 { 
+      color: var.$light-color; 
+      margin-bottom: 1rem; 
+      font-weight: bold; 
+    } 
+  }
+  
+  .tags-list { 
+    display: flex; 
+    justify-content: center; 
+    gap: 0.5rem; 
+    list-style: none; 
+    padding: 0; 
+    flex-wrap: wrap; 
+    
+    li a { 
+      display: inline-block; 
+      background-color: var.$primary-color; 
+      color: var.$secondary-color; 
+      padding: 0.4rem 0.8rem; 
+      border-radius: 5px; 
+      text-decoration: none; 
+      font-weight: bold; 
+      font-size: 0.8rem; 
+    } 
+  }
+  
+  .post-header { 
+    text-align: left; 
+    border-bottom: none; 
+    padding-bottom: 0; 
+    margin-bottom: 1.5rem; 
+  }
+  
+  .post-title { 
+    font-size: 3.5rem; 
+  }
+  
+  .post-meta { 
+    flex-direction: row; 
+    justify-content: flex-start; 
+    gap: 1.5rem; 
+  }
+}
