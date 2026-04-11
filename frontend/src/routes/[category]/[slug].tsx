@@ -4,6 +4,9 @@ import { fetchEntryDetail } from "~/lib/api";
 import { Title, Meta } from "@solidjs/meta";
 import { Show } from "solid-js";
 
+// src/routes/[category]/[slug].tsx
+export const config = { prerender: false, ssr: true };
+
 export default function PostDetail() {
   const params = useParams();
   const post = createAsync(() => fetchEntryDetail(params.slug ?? ''));

@@ -11,5 +11,6 @@ export const navLinks = [
   // { text: 'CONTACTO', href: '/contacto' },
   { text: 'SOBRE NOSOTROS', href: '/sobre-nosotros' },
   { text: 'FAQ', href: '/faq' },
+  { text: 'Mi-Perfil', href: '/perfil' },
 
 ];

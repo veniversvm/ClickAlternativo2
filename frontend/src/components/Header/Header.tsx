@@ -1,59 +1,66 @@
+import { For, Show, Suspense } from "solid-js";
 import { A } from "@solidjs/router";
-import { For } from "solid-js";
 import { navLinks } from "~/data/navigation";
+import { useAuth } from "~/context/AuthContext";
 
-interface HeaderProps {
+export default function Header(props: {
   isMenuOpen: boolean;
   onToggleMenu: () => void;
-}
+}) {
+  const auth = useAuth();
 
-export default function Header(props: HeaderProps) {
   return (
-    <header class="main-header">
-      {/* Logo principal */}
-      <A href="/" class="header-logo" activeClass="is-active" end={true}>
-        Click Alternativo
-      </A>
-
-      {/* Botón Hamburguesa Reactivo */}
-      <button
-        class="hamburger-button"
-        // classList aplica 'is-active' solo si isMenuOpen es true
-        classList={{ "is-active": props.isMenuOpen }}
-        onClick={(e) => {
-          e.stopPropagation(); // Evita que el click cierre el menú inmediatamente
-          props.onToggleMenu();
-        }}
-        aria-label="Abrir/Cerrar menú"
-        aria-expanded={props.isMenuOpen}
-      >
-        <span class="line line1"></span>
-        <span class="line line2"></span>
-        <span class="line line3"></span>
-      </button>
-
-      {/* Menú de escritorio (Solo visible en PC por CSS) */}
-      <nav class="desktop-nav">
-        <A href="/" class="mini-logo-link" end={true}>
-          <img 
-            src="/Logo/MiniLogo.svg" 
-            alt="Inicio" 
-            class="desktop-nav-image" 
-          />
+    <header class="header-container">
+      <nav class="header-center">
+        <A href="/" class="mini-logo-link">
+          <img src="/Logo/MiniLogo.svg" alt="Inicio" class="desktop-nav-image" />
         </A>
-        
         <For each={navLinks}>
           {(link) => (
-            <A 
-              href={link.href} 
-              class="nav-link" 
-              activeClass="active-page" // Clase para resaltar el link actual
-            >
+            <A href={link.href} class="header-link" activeClass="active">
               {link.text}
             </A>
           )}
         </For>
       </nav>
+
+      <div class="header-right">
+        <Suspense fallback={<div class="auth-placeholder" />}>
+          <Show
+            when={auth.user()}
+            fallback={<A href="/login" class="header-login-btn">ENTRAR</A>}
+          >
+            <div class="header-user-pill">
+              <div class="header-avatar-box">
+                <Show
+                  when={auth.user()?.avatar_url}
+                  fallback={
+                    <span class="avatar-letter">
+                      {auth.user()?.username?.[0]?.toUpperCase()}
+                    </span>
+                  }
+                >
+                  <img src={auth.user()!.avatar_url} alt="Avatar" />
+                </Show>
+              </div>
+              <span class="header-username">{auth.user()?.username}</span>
+              <button onClick={() => auth.logout()} class="header-logout-btn">
+                SALIR
+              </button>
+            </div>
+          </Show>
+        </Suspense>
+
+        <button
+          class="header-hamburger"
+          classList={{ active: props.isMenuOpen }}
+          onClick={(e) => { e.stopPropagation(); props.onToggleMenu(); }}
+          aria-label="Abrir/Cerrar menú"
+          aria-expanded={props.isMenuOpen}
+        >
+          <span /><span /><span />
+        </button>
+      </div>
     </header>
   );
 }

@@ -19,22 +19,26 @@ func SetupRoutes(app *fiber.App,
 
 	// --- RUTAS PÚBLICAS ---
 	api.Get("/health", func(c *fiber.Ctx) error {
-		return c.SendString("Click Alternativo API OK")
+		return c.JSON(fiber.Map{"status": "ok", "message": "Click Alternativo API v1.0"})
 	})
 
-	// Autenticación
+	// Autenticación Mixta
 	auth := api.Group("/auth")
 	auth.Post("/admin/login", adminHandler.Login)
 	auth.Post("/user/register", userAuthHandler.Register)
 	auth.Post("/user/login", userAuthHandler.Login)
-	auth.Post("/logout", adminHandler.Logout) // Logout común (limpia cookie)
+	auth.Post("/user/logout", userAuthHandler.Logout)
 
-	// Contenido Público (SEO)
+	// --- NUEVAS: Google OAuth ---
+	auth.Get("/google/login", userAuthHandler.GoogleLogin)
+	auth.Get("/google/callback", userAuthHandler.GoogleCallback)
+
+	// Contenido Público (Optimizado para SEO)
 	api.Get("/categories", categoryHandler.GetAll)
 	api.Get("/entries", entryHandler.GetPaginated)
 	api.Get("/entries/:slug", entryHandler.GetBySlug)
 
-	// --- RUTAS PROTEGIDAS (USUARIOS) ---
+	// --- RUTAS PROTEGIDAS (USUARIOS REGULARES) ---
 	user := api.Group("/user")
 	user.Use(middleware.Protected())
 	user.Get("/profile", userHandler.GetProfile)
@@ -45,16 +49,18 @@ func SetupRoutes(app *fiber.App,
 	admin.Use(middleware.Protected())
 	admin.Use(middleware.OnlyAdmin())
 
-	// Gestión de Contenido
+	// Gestión de Categorías
 	admin.Post("/categories", categoryHandler.Create)
 	admin.Put("/categories/:id", categoryHandler.Update)
 	admin.Delete("/categories/:id", categoryHandler.Delete)
 
+	// Gestión de Entradas (Curaduría)
 	admin.Post("/entries", entryHandler.Create)
 	admin.Put("/entries/:id", entryHandler.Update)
 	admin.Delete("/entries/:id", entryHandler.Delete)
 
 	// --- RUTAS PROTEGIDAS (SUPER-ADMIN) ---
+	// Gestión de otros administradores
 	super := admin.Group("/management")
 	super.Use(middleware.OnlySuperAdmin())
 	super.Get("/users", mgmtHandler.List)

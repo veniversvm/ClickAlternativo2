@@ -1,0 +1,35 @@
+@use "~/styles/variables" as var;
+
+// Reutilizamos las clases que definimos en SubscribeForm para ahorrar código
+.auth-card {
+  background: rgba(20, 20, 20, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid var.$primary-color;
+  padding: 2.5rem;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  margin: 3rem auto;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+  h2 { font-family: var.$font-family-display; color: var.$light-color; font-size: 2.2rem; margin-bottom: 0.5rem; }
+  .auth-subtitle { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+}
+
+// ... (El resto de estilos .google-btn, .divider, .input-group, .submit-btn 
+// son idénticos al de SubscribeForm.scss. 
+// Recomendación: moverlos a un archivo auth-shared.scss)
+
+.auth-footer-text {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #666;
+  
+  a {
+    color: var.$primary-color;
+    text-decoration: none;
+    font-weight: bold;
+    &:hover { text-decoration: underline; }
+  }
+}

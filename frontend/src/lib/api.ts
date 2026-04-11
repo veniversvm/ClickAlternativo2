@@ -1,75 +1,107 @@
+import { getRequestEvent } from "solid-js/web";
+
 const isServer = typeof window === "undefined";
-const API_URL = isServer
-  ? (process.env.DOCKER_ENV ? "http://click_api:8080/api/v1" : "http://localhost:8080/api/v1")
-  : "http://localhost:8080/api/v1";
 
-// Cancela la petición anterior si se hace una nueva antes de que termine
-let currentController: AbortController | null = null;
+// --- CONFIGURACIÓN DE URLS DINÁMICAS ---
+// Si estamos en el navegador, usamos localhost.
+// Si estamos en el servidor Bun:
+//   - En Docker usamos SERVER_API_URL (http://click_api:8080)
+//   - En local (bun dev) usamos la misma URL del cliente (http://localhost:8080)
+const PUBLIC_API = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
+const SERVER_API = isServer 
+  ? (process.env.SERVER_API_URL || PUBLIC_API) 
+  : PUBLIC_API;
 
-async function safeFetch(url: string, timeout = 5000, signal?: AbortSignal) {
-  const controller = new AbortController();
+export const API_BASE_URL = isServer ? SERVER_API : PUBLIC_API;
 
-  // Combinamos la señal externa (abort por navegación) con el timeout interno
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+/**
+ * Motor de peticiones con reenvío de Cookies (SSR) y Failsafe
+ */
+async function request(endpoint: string, options: RequestInit = {}) {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const headers = new Headers(options.headers || {});
+  headers.set("Content-Type", "application/json");
 
-  // Si viene una señal externa (ej: el componente se desmonta), la escuchamos
-  signal?.addEventListener("abort", () => controller.abort());
+  // --- MAGIA DEL SSR: PASAR COOKIES DEL NAVEGADOR A GO ---
+  if (isServer) {
+    const event = getRequestEvent();
+    const cookie = event?.request.headers.get("cookie");
+    if (cookie) {
+      headers.set("cookie", cookie);
+      // Opcional: console.log(`[SSR] Enviando cookie a Go en ${url}`);
+    }
+  }
 
   try {
     const response = await fetch(url, {
-      signal: controller.signal,
-      credentials: isServer ? "include" : "same-origin",
+      ...options,
+      headers,
+      // 'include' permite que el navegador envíe y reciba cookies HttpOnly
+      credentials: "include", 
     });
 
-    clearTimeout(timeoutId);
+    // 204 No Content (útil para Logout o Delete)
+    if (response.status === 204) return { success: true };
 
-    if (!response.ok) {
-      console.error(`[API Error] ${response.status} en ${url}`);
+    // Si la sesión expiró o no es válida, devolvemos null para que AuthContext lo sepa
+    if (response.status === 401 || response.status === 403) {
       return null;
     }
 
-    return await response.json();
-  } catch (error: any) {
-    clearTimeout(timeoutId);
-    if (error.name === "AbortError") {
-      console.error(`[API Aborted] ${url}`);
-    } else {
-      console.error(`[API Connection Failed] No se pudo conectar a ${url}`);
+    const data = await response.json();
+    if (!response.ok) {
+      return { error: true, message: data.error || "Error desconocido", status: response.status };
     }
-    return null;
+
+    return data;
+  } catch (e) {
+    console.error(`[API Connection Failed] No se pudo conectar a ${url}`);
+    return null; // Failsafe: evita que la app explote
   }
 }
 
-export async function fetchEntries(
-  category = "",
-  page = 1,
-  search = "",
-  signal?: AbortSignal
-) {
-  // Cancela la petición anterior si todavía estaba en vuelo
-  if (currentController) {
-    currentController.abort();
-  }
-  currentController = new AbortController();
+// --- MÓDULOS DE API ---
 
-  // Fusionamos la señal del caller con la nuestra
-  const combinedSignal = signal ?? currentController.signal;
+export const blogApi = {
+  getPaginated: async (category = "", page = 1, search = "") => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      tag: category || "",
+      search: search || ""
+    });
+    const data = await request(`/entries?${params.toString()}`);
+    return data || { results: [], page: 1, limit: 20, error: true };
+  },
 
-  const url = new URL(`${API_URL}/entries`);
-  url.searchParams.set("page", page.toString());
-  if (category) url.searchParams.set("tag", category);
-  if (search) url.searchParams.set("search", search);
+  getBySlug: async (slug: string) => {
+    return await request(`/entries/${slug}`);
+  },
 
-  const data = await safeFetch(url.toString(), 5000, combinedSignal);
+  getCategories: () => request("/categories")
+};
 
-  if (!data) {
-    return { results: [], page: 1, limit: 20, error: true };
-  }
+export const authApi = {
+  register: (userData: any) => request("/auth/user/register", { 
+    method: "POST", body: JSON.stringify(userData) 
+  }),
+  
+  login: (credentials: any) => request("/auth/user/login", { 
+    method: "POST", body: JSON.stringify(credentials) 
+  }),
 
-  return { ...data, error: false };
-}
+  logout: () => request("/auth/user/logout", { method: "POST" }),
 
-export async function fetchEntryDetail(slug: string, signal?: AbortSignal) {
-  const data = await safeFetch(`${API_URL}/entries/${slug}`, 5000, signal);
-  return data || null;
-}
+  getGoogleLoginUrl: () => `${API_BASE_URL}/auth/google/login`
+};
+
+export const userApi = {
+  getProfile: async () => {
+    const data = await request("/user/profile");
+    // Si Go devuelve un error de sesión, request() devuelve null automáticamente
+    return data; 
+  },
+
+  updateProfile: (data: { notify_email: boolean; notify_push: boolean; tag_ids: number[] }) => 
+    request("/user/profile", { method: "PUT", body: JSON.stringify(data) }),
+};

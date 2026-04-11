@@ -1,0 +1,67 @@
+@use "~/styles/variables" as var;
+
+.settings-card {
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(var.$primary-color, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 600px;
+  margin: 2rem auto;
+  color: white;
+
+  .settings-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    .settings-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var.$primary-color; margin-bottom: 1rem; }
+    h2 { font-family: var.$font-family-display; font-size: 2rem; margin: 0; }
+    p { color: #888; font-size: 0.9rem; }
+  }
+
+  .settings-section {
+    margin-bottom: 2rem;
+    h3 { border-bottom: 1px solid #444; padding-bottom: 0.5rem; margin-bottom: 1.5rem; color: var.$primary-color; }
+  }
+
+  .setting-item {
+    margin-bottom: 1rem;
+    label { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    input[type="checkbox"] { accent-color: var.$primary-color; width: 20px; height: 20px; }
+  }
+
+  .tags-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    .tag-pill-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      border: 1px solid #555;
+      background: transparent;
+      color: #ccc;
+      cursor: pointer;
+      transition: all 0.2s;
+      &.active {
+        background: var.$primary-color;
+        color: black;
+        border-color: var.$primary-color;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var.$primary-color;
+    color: black;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    &:disabled { opacity: 0.5; }
+  }
+
+  .status-msg { text-align: center; color: var.$primary-color; margin-bottom: 1rem; font-weight: bold; }
+}

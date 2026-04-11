@@ -1,0 +1,74 @@
+# ==============================================================================
+# SISTEMA Y EDITORES
+# ==============================================================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.log
+
+# ==============================================================================
+# BACKEND (Go)
+# ==============================================================================
+# Binarios compilados
+bin/
+out/
+/app-main
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test y Cobertura
+*.test
+*.out
+coverage.txt
+
+# Dependencias (si usas vendor/, de lo contrario Go usa el cache global)
+# vendor/
+
+# ==============================================================================
+# FRONTEND (Deno / SolidJS)
+# ==============================================================================
+# Directorios de build
+dist/
+.output/
+.solid/
+.vercel/
+.astro/
+
+# Dependencias
+node_modules/
+# Deno cache (si se configura localmente)
+.deno_plugins/
+
+# Formatos de lockfile (opcional: a veces se guardan, pero en Deno/DNT es común ignorar si se regeneran)
+# deno.lock
+
+# ==============================================================================
+# INFRAESTRUCTURA Y SECRETOS (Crítico para AWS/Postgres)
+# ==============================================================================
+# Archivos de entorno (NUNCA subir al repo)
+.env
+.env.local
+.env.*.local
+*.pem
+config.yaml
+
+# AWS CLI y temporales de credenciales
+.aws/
+terraform.tfstate*
+
+# Base de Datos Local
+# Si usas Docker para Postgres, ignora la carpeta de volumen de datos
+pgdata/
+postgres-data/
+
+# ==============================================================================
+# OTROS
+# ==============================================================================
+# Imágenes o archivos temporales de subida (S3 Mock local)
+uploads/
+temp/

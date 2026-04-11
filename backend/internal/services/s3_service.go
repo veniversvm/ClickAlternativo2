@@ -17,49 +17,49 @@ import (
 type S3Service struct {
 	client     *s3.Client
 	bucketName string
-	region     string
+	endpoint   string
 }
 
-// NewS3Service inicializa la configuración de AWS
-func NewS3Service(region, accessKey, secretKey, bucketName string) (*S3Service, error) {
+func NewS3Service(region, accessKey, secretKey, bucketName, endpoint string) (*S3Service, error) {
+	// Configuración específica para MinIO
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error cargando configuración de AWS: %w", err)
+		return nil, err
 	}
 
-	client := s3.NewFromConfig(cfg)
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(endpoint)
+		o.UsePathStyle = true // CRÍTICO: MinIO usa path-style
+	})
+
 	return &S3Service{
 		client:     client,
 		bucketName: bucketName,
-		region:     region,
+		endpoint:   endpoint,
 	}, nil
 }
 
 // UploadImage sube una imagen y retorna la URL pública
 func (s *S3Service) UploadImage(file io.Reader, fileName string, contentType string) (string, error) {
-	// Generar nombre único: uuid + extensión original
 	ext := filepath.Ext(fileName)
-	newFileName := fmt.Sprintf("entries/%s%s", uuid.New().String(), ext)
+	key := fmt.Sprintf("entries/%s%s", uuid.New().String(), ext)
 
 	_, err := s.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucketName),
-		Key:         aws.String(newFileName),
+		Key:         aws.String(key),
 		Body:        file,
 		ContentType: aws.String(contentType),
-		// ACL: aws.String("public-read"), // Descomentar si el bucket permite ACLs públicas
 	})
 
 	if err != nil {
-		return "", fmt.Errorf("error subiendo archivo a S3: %w", err)
+		return "", err
 	}
 
-	// Retornar la URL de la imagen
-	// Si usas CloudFront o dominio personalizado, cámbialo aquí
-	url := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.bucketName, s.region, newFileName)
-	return url, nil
+	// La URL resultante apuntará a tu servidor MinIO
+	return fmt.Sprintf("%s/%s/%s", s.endpoint, s.bucketName, key), nil
 }
 
 // DeleteImageByUrl extrae la llave de la URL y elimina el objeto de S3

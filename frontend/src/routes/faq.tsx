@@ -2,6 +2,8 @@
 import { Title, Meta } from "@solidjs/meta";
 import { FAQComponent } from "~/components/FAQ/FaqComponent";
 
+export const config = { prerender: false, ssr: true };
+
 export default function Faq() {
   return (
     <>

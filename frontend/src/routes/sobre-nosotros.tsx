@@ -1,6 +1,7 @@
 // src/routes/about.tsx
 import { Title, Meta, Link } from "@solidjs/meta";
 import { AboutUsComponent } from "~/components/About-Us/AboutUs";
+export const config = { prerender: false, ssr: true };
 
 export default function SobreNosotros() {
   const description = "Click Alternativo: El buscador humano que prioriza la calidad. Conocé a nuestro equipo y nuestra metodología de curaduría de contenido web verificado.";

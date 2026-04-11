@@ -1,200 +1,163 @@
-@use "~/styles/variables" as var; // El alias ~ siempre apunta a src/
-@use 'sass:color';
+@use "~/styles/variables" as var;
 
-// .main-header {
-//   // En móvil, este header es solo un contenedor para el botón fijo.
-//   // No necesita estilos visuales por ahora.
-// }
+.header-container {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #000000;
+  height: 75px;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid rgba(var.$primary-color, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  width: 100%;
+  box-sizing: border-box;
+}
 
+/* --- BLOQUES --- */
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
 
-/* --- BOTÓN HAMBURGUESA --- */
-.hamburger-button {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 1001;
-  width: 3rem;
-  height: 3rem;
-  padding: 0;
-  background: #000000;
-  border: 2px solid var.$primary-color;
-  border-radius: 0.5rem;
-  cursor: pointer;
+.header-center {
+  display: none; // Oculto en móvil
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 2; // Toma más espacio para que los links no se amontonen
+
+  @media (min-width: 1024px) {
+    display: flex;
+  }
+
+  .header-link {
+    color: var.$primary-color;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    &:hover { color: #b3ffb3; }
+    &.active { border-bottom: 2px solid var.$primary-color; }
+  }
+
+  .desktop-nav-image {
+    height: 35px;
+    width: auto;
+    margin-right: 1rem;
+  }
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* --- LOGO IZQUIERDO --- */
+.header-logo-text {
+  font-family: var.$font-family-display;
+  color: var.$primary-color;
+  text-decoration: none;
+  font-size: 1.4rem;
+  font-weight: bold;
+  white-space: nowrap;
+  
+  @media (max-width: 1024px) {
+      display: none; // Ocultar texto en móvil para que no choque con la hamburguesa
+  }
+}
+
+/* --- BOTÓN ENTRAR (Visible cuando logout) --- */
+.header-login-btn {
+  background: var.$primary-color;
+  color: black !important;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+  &:hover { transform: scale(1.05); }
+}
+
+/* --- PILL DE USUARIO (Visible cuando login) --- */
+.header-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.3rem 0.6rem;
+  border-radius: 50px;
+  border: 1px solid rgba(var.$primary-color, 0.2);
+
+  .header-avatar-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var.$primary-color;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-letter { color: black; font-weight: bold; font-size: 0.9rem; }
+  }
+
+  .header-username {
+    color: white;
+    font-size: 0.8rem;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    @media (max-width: 600px) { display: none; }
+  }
+
+  .header-logout-btn {
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+  }
+}
+
+/* --- HAMBURGUESA --- */
+.header-hamburger {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 0.375rem;
-  transition: all 0.3s ease-in-out;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  background: #000;
+  border: 2px solid var.$primary-color;
+  border-radius: 8px;
+  cursor: pointer;
+  @media (min-width: 1024px) { display: none; }
 
-  .line {
+  span {
     display: block;
-    width: 1.5rem;
-    height: 0.1875rem;
-    background-color: var.$primary-color;
-    border-radius: 0.125rem;
-    transition: all 0.3s ease-in-out;
+    width: 20px;
+    height: 2px;
+    background: var.$primary-color;
+    transition: all 0.3s ease;
   }
 
-  &:hover {
-    background: color.adjust(var.$secondary-color, $lightness: 15%);
-
-    .line {
-      background-color: color.adjust(var.$primary-color, $lightness: 10%);
-    }
-  }
-
-  /* Estado activo (X) */
-  &.is-active {
-    transform: translateX(calc(var(--sidebar-width) - 4rem));
-
-    // 👇 CAMBIO 3: Devolver el color de fondo negro
-    background-color: var.$secondary-color;
-
-    border-color: #ff4757; // Mantenemos el borde rojo para que la 'X' destaque
-
-    .line {
-      background-color: #ff4757; // Líneas rojas
-    }
-
-    .line1 {
-      transform: translateY(0.5rem) rotate(45deg);
-    }
-
-    .line2 {
-      opacity: 0;
-    }
-
-    .line3 {
-      transform: translateY(-0.5rem) rotate(-45deg);
-    }
-  }
-}
-
-/* OVERLAY */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-  z-index: 998;
-  //  align-items: center;
-}
-
-#sidebar-menu.is-open~.overlay {
-  opacity: 1;
-  visibility: visible;
-}
-
-#sidebar-menu.is-open~.overlay {
-  opacity: 1;
-  visibility: visible;
-}
-
-
-
-/* Ocultamos la navegación de escritorio por defecto */
-.desktop-nav {
-  display: none;
-}
-
-/* --- VISTA DE ESCRITORIO (A PARTIR DE 768px) --- */
-@media (min-width: 1000px) {
-
-  /* 1. Ocultamos los elementos de navegación móvil */
-  .hamburger-button,
-  #sidebar-menu,
-  // Usamos el ID del sidebar para ocultarlo
-  .overlay {
-    display: none !important;
-  }
-
-  /* 2. Estilizamos el header para que funcione como una barra de navegación */
-  .main-header {
-    display: flex;
-    align-items: center;
-    /* Centra los items verticalmente */
-
-    /* ¡LA MAGIA! Separa los elementos hijos a los extremos */
-    justify-content: space-between;
-
-    padding: 1rem 2.5rem;
-    /* Más padding horizontal para que no esté pegado a los bordes */
-    background-color: #000000;
-    /* Fondo negro */
-    position: sticky;
-    top: 0;
-    z-index: 900;
-  }
-
-  /* 3. Mostramos y estilizamos el logo */
-  .header-logo {
-    display: block;
-    /* Lo hacemos visible */
-    color: var.$primary-color;
-    /* Color verde principal */
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 1.5rem;
-    /* Tamaño más grande para destacar */
-  }
-
-  /* 4. Mostramos la navegación de escritorio */
-  .desktop-nav {
-    display: flex;
-    align-items: center; // centra logo y enlaces verticalmente
-    gap: 1.5rem;
-    /* Espacio entre los enlaces */
-
-    a {
-      color: var.$primary-color;
-      /* Color verde principal */
-      text-decoration: none;
-      font-size: 1.1rem;
-      font-weight: 500;
-      transition: color 0.2s, transform 0.2s;
-
-      &:hover {
-        color: #b3ffb3; // Un verde más claro al pasar el mouse
-        transform: scale(1.05);
-        /* Efecto sutil de crecimiento */
-      }
-    }
-
-    .desktop-nav-image {
-      height: 100%;
-      width: auto;
-      object-fit: contain;
-      display: block;
-    }
-  }
-
-}
-
-/* IMPORTANTE: Ocultar el logo en móvil */
-.header-logo {
-  display: none;
-}
-
-/* En tu layout.scss */
-
-.overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-  z-index: 998;
-
-  &.is-visible {
-    opacity: 1;
-    visibility: visible;
+  &.active {
+    border-color: #ff4757;
+    span { background: #ff4757; }
+    span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    span:nth-child(2) { opacity: 0; }
+    span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
   }
 }

@@ -1,44 +1,70 @@
 // frontend/src/styles/app.scss
 @use "~/styles/variables" as var;
+@use "~/styles/global";
+@use "~/styles/layout";
+@use "~/components/Header/Header";
+@use "~/components/Menu/side-bars";
+@use "~/components/Button/button";
+@use "~/components/Footer/footer";
+@use "~/components/Welcome/Welcome";
+@use "~/components/PostCard/PostCard";
+@use "~/components/SearchBar/SearchBar";
+@use "~/components/SearchResults/SearchResults";
+@use "~/components/Navigation/PostNavigation";
 
-@import "~/styles/normalize.css";
-@import "~/styles/global.scss";
-@import "~/styles/layout.scss";
-
-// Revisa que los nombres coincidan exactamente con tu disco (mayúsculas/minúsculas)
-@import "~/components/Welcome/Welcome.scss";
-@import "~/components/PostCard/PostCard.scss";
-@import "~/components/Footer/footer.scss";       
-@import "~/components/Menu/side-bars.scss";     
-@import "~/components/SearchBar/SearchBar.scss";
-@import "~/components/SearchResults/SearchResults.scss";
-@import "~/components/Navigation/PostNavigation.scss";
-
-/* Transición de páginas */
+/* Transiciones de página */
 .page-fade-enter-active,
 .page-fade-exit-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .page-fade-enter-from,
 .page-fade-exit-to {
   opacity: 0;
-  transform: translateY(10px); // Sutil movimiento hacia arriba al entrar
+  transform: translateY(8px);
 }
 
-/* Opcional: Estilo para el loader del Suspense */
+.page-fade-enter-to,
+.page-fade-exit-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .page-loader {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 50vh;
-  font-family: var.$font-family-display;
   color: var.$primary-color;
-  font-size: 1.5rem;
-  animation: pulse 1.5s infinite;
+  font-size: 1.2rem;
 }
 
-.api-down-message, .critical-error {
+.critical-error {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 0, 0, 0.05);
+  border: 1px dashed #ff4757;
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 600px;
+
+  p {
+    color: #ff4757;
+    font-weight: bold;
+  }
+
+  button {
+    margin-top: 1rem;
+    background: var.$primary-color;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+}
+
+.api-down-message {
   text-align: center;
   padding: 3rem;
   background: rgba(255, 0, 0, 0.05);
@@ -48,7 +74,7 @@
   max-width: 600px;
 
   p { color: #ff4757; font-weight: bold; }
-  
+
   button {
     margin-top: 1rem;
     background: var.$primary-color;

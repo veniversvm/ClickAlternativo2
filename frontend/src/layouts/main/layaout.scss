@@ -1,77 +1,8 @@
-@use '../../styles/variables' as var;
-@use 'sass:color';
+@use '~/styles/variables' as var;
 
-// .main-header {
-//   // En móvil, este header es solo un contenedor para el botón fijo.
-//   // No necesita estilos visuales por ahora.
-// }
+// Todo lo de .hamburger-button, .desktop-nav, .main-header,
+// .header-logo ya está en Header.scss — no duplicar aquí.
 
-
-/* --- BOTÓN HAMBURGUESA --- */
-.hamburger-button {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 1001;
-  width: 3rem;
-  height: 3rem;
-  padding: 0;
-  background: #000000;
-  border: 2px solid var.$primary-color;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 0.375rem;
-  transition: all 0.3s ease-in-out;
-
-  .line {
-    display: block;
-    width: 1.5rem;
-    height: 0.1875rem;
-    background-color: var.$primary-color;
-    border-radius: 0.125rem;
-    transition: all 0.3s ease-in-out;
-  }
-
-  &:hover {
-    background: color.adjust(var.$secondary-color, $lightness: 15%);
-
-    .line {
-      background-color: color.adjust(var.$primary-color, $lightness: 10%);
-    }
-  }
-
-  /* Estado activo (X) */
-  &.is-active {
-    transform: translateX(calc(var(--sidebar-width) - 4rem));
-
-    // 👇 CAMBIO 3: Devolver el color de fondo negro
-    background-color: var.$secondary-color;
-
-    border-color: #ff4757; // Mantenemos el borde rojo para que la 'X' destaque
-
-    .line {
-      background-color: #ff4757; // Líneas rojas
-    }
-
-    .line1 {
-      transform: translateY(0.5rem) rotate(45deg);
-    }
-
-    .line2 {
-      opacity: 0;
-    }
-
-    .line3 {
-      transform: translateY(-0.5rem) rotate(-45deg);
-    }
-  }
-}
-
-/* OVERLAY */
 .overlay {
   position: fixed;
   top: 0;
@@ -83,100 +14,9 @@
   visibility: hidden;
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
   z-index: 998;
-  //  align-items: center;
-}
 
-#sidebar-menu.is-open~.overlay {
-  opacity: 1;
-  visibility: visible;
-}
-
-#sidebar-menu.is-open~.overlay {
-  opacity: 1;
-  visibility: visible;
-}
-
-
-
-/* Ocultamos la navegación de escritorio por defecto */
-.desktop-nav {
-  display: none;
-}
-
-/* --- VISTA DE ESCRITORIO (A PARTIR DE 768px) --- */
-@media (min-width: 1000px) {
-
-  /* 1. Ocultamos los elementos de navegación móvil */
-  .hamburger-button,
-  #sidebar-menu,
-  // Usamos el ID del sidebar para ocultarlo
-  .overlay {
-    display: none !important;
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
   }
-
-  /* 2. Estilizamos el header para que funcione como una barra de navegación */
-  .main-header {
-    display: flex;
-    align-items: center;
-    /* Centra los items verticalmente */
-
-    /* ¡LA MAGIA! Separa los elementos hijos a los extremos */
-    justify-content: space-between;
-
-    padding: 1rem 2.5rem;
-    /* Más padding horizontal para que no esté pegado a los bordes */
-    background-color: #000000;
-    /* Fondo negro */
-    position: sticky;
-    top: 0;
-    z-index: 900;
-  }
-
-  /* 3. Mostramos y estilizamos el logo */
-  .header-logo {
-    display: block;
-    /* Lo hacemos visible */
-    color: var.$primary-color;
-    /* Color verde principal */
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 1.5rem;
-    /* Tamaño más grande para destacar */
-  }
-
-  /* 4. Mostramos la navegación de escritorio */
-  .desktop-nav {
-    display: flex;
-    align-items: center; // centra logo y enlaces verticalmente
-    gap: 1.5rem;
-    /* Espacio entre los enlaces */
-
-    a {
-      color: var.$primary-color;
-      /* Color verde principal */
-      text-decoration: none;
-      font-size: 1.1rem;
-      font-weight: 500;
-      transition: color 0.2s, transform 0.2s;
-
-      &:hover {
-        color: #b3ffb3; // Un verde más claro al pasar el mouse
-        transform: scale(1.05);
-        /* Efecto sutil de crecimiento */
-      }
-    }
-
-    .desktop-nav-image {
-      height: 100%;
-      width: auto;
-      object-fit: contain;
-      display: block;
-    }
-  }
-
-}
-
-/* IMPORTANTE: Ocultar el logo en móvil */
-.header-logo {
-  display: none;
 }

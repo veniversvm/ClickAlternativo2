@@ -1,0 +1,71 @@
+@use "~/styles/variables" as var;
+
+.auth-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 2rem 1rem;
+}
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 450px;
+}
+
+.auth-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 5px;
+  border-radius: 12px;
+  margin-bottom: -15px; // Se solapa ligeramente con la tarjeta para un look moderno
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(var.$primary-color, 0.3);
+
+  .tab-btn {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    background: transparent;
+    color: #888;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &.active {
+      background: var.$primary-color;
+      color: #121212;
+      box-shadow: 0 4px 15px rgba(var.$primary-color, 0.3);
+    }
+  }
+}
+
+.auth-form-container {
+  /* Los estilos de .auth-card que definimos antes se aplicarán aquí */
+  animation: fadeIn 0.4s ease-out;
+}
+
+.auth-switch-text {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #666;
+  font-size: 0.9rem;
+
+  button {
+    background: none;
+    border: none;
+    color: var.$primary-color;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+    &:hover { color: white; }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,207 @@
+@use "~/styles/variables" as var;
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #000000;
+  height: 75px;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid rgba(var.$primary-color, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* --- CENTRO: logo + links (solo desktop) --- */
+.header-center {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex: 1;
+  }
+}
+
+.mini-logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.desktop-nav-image {
+  height: 35px;
+  width: auto;
+}
+
+.header-link {
+  color: var.$primary-color;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #b3ffb3;
+  }
+
+  &.active {
+    border-bottom: 2px solid var.$primary-color;
+    padding-bottom: 2px;
+  }
+}
+
+/* --- DERECHA: auth + hamburguesa --- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto; // empuja todo a la derecha cuando header-center está oculto
+}
+
+/* --- BOTÓN ENTRAR --- */
+.header-login-btn {
+  background: var.$primary-color;
+  color: #000 !important;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* --- PILL DE USUARIO --- */
+.header-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+  border-radius: 50px;
+  border: 1px solid rgba(var.$primary-color, 0.2);
+}
+
+.header-avatar-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var.$primary-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatar-letter {
+  color: #000;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.header-username {
+  color: white;
+  font-size: 0.8rem;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.header-logout-btn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.2s;
+
+  &:hover {
+    filter: brightness(1.2);
+  }
+}
+
+/* --- HAMBURGUESA (solo mobile) --- */
+.header-hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  background: #000;
+  border: 2px solid var.$primary-color;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.3s;
+
+  @media (min-width: 1024px) {
+    display: none;
+  }
+
+  span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var.$primary-color;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  &.active {
+    border-color: #ff4757;
+
+    span {
+      background: #ff4757;
+    }
+
+    span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    span:nth-child(2) {
+      opacity: 0;
+    }
+
+    span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+  }
+}
+
+.user-link-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none; // Quita el subrayado
+  color: inherit;       // Mantiene el color blanco del texto
+  
+  &:hover .header-username {
+    color: var.$primary-color; // Resalta el nombre al pasar el mouse
+  }
+}

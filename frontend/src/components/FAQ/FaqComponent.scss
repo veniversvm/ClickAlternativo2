@@ -1,87 +1,78 @@
 @use '~/styles/variables' as var;
 
-/* ======================================================
-   FAQ — estilos replicando la estética del About Us
-   ====================================================== */
-
-.section-faq { // Cambiado de # a . para coincidir con tu class="section-faq"
-  display: block; // Asegura comportamiento vertical
+.section-faq {
+  display: block;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
   color: var.$light-color;
-  font-family: var.$font-family;
+  font-family: var.$font-family-display;
   line-height: 1.6;
-
-  /* ===== HEADER ===== */
-  &__header {
-    display: block; // Asegura que el header ocupe todo el ancho
-    margin-bottom: 2.5rem;
-    text-align: center;
-
-    .section-faq__title {
-      font-size: 2.2rem;
-      color: var.$primary-color;
-      margin-bottom: 0.75rem;
-      line-height: 1.05;
-    }
-
-    .section-faq__intro {
-      font-size: 1.1rem;
-      max-width: 900px;
-      margin: 0 auto;
-      color: rgba(255, 255, 255, 0.9);
-    }
-  }
-
-  /* ===== CONTENIDO ===== */
-  &__container {
-    display: flex;
-    flex-direction: column; // ESTO garantiza que los items no se pongan uno al lado del otro
-    gap: 2rem;              // Espacio entre preguntas
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  &__item {
-    display: block; // Cada item es un bloque vertical
-    width: 100%;
-  }
-
-  &__question {
-    font-size: 1.6rem;
-    color: var.$primary-color;
-    margin-bottom: 1rem;
-    border-left: 4px solid var.$primary-color;
-    padding-left: 1rem;
-  }
-
-  &__answer {
-    color: var.$light-color;
-    line-height: 1.7;
-    font-size: 1rem;
-    margin: 0;
-  }
-
-  /* ===== Resaltados ===== */
-  .text-highlight {
-    color: #5e9653;
-    font-weight: 700;
-  }
 }
 
-/* ===== RESPONSIVE ===== */
+.section-faq__header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.section-faq__title {
+  font-size: 2.2rem;
+  color: var.$primary-color;
+  margin-bottom: 0.75rem;
+  line-height: 1.05;
+}
+
+.section-faq__intro {
+  font-size: 1.1rem;
+  max-width: 900px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.section-faq__container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.section-faq__item {
+  display: block;
+  width: 100%;
+}
+
+.section-faq__question {
+  font-size: 1.6rem;
+  color: var.$primary-color;
+  margin-bottom: 1rem;
+  border-left: 4px solid var.$primary-color;
+  padding-left: 1rem;
+}
+
+.section-faq__answer {
+  color: var.$light-color;
+  line-height: 1.7;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.text-highlight {
+  color: #5e9653;
+  font-weight: 700;
+}
+
 @media (min-width: 768px) {
   .section-faq {
     padding: 3rem 2rem;
+  }
 
-    &__header .section-faq__title {
-      font-size: 2.8rem;
-    }
+  .section-faq__title {
+    font-size: 2.8rem;
+  }
 
-    .section-faq__question {
-      font-size: 1.8rem;
-    }
+  .section-faq__question {
+    font-size: 1.8rem;
   }
 }
