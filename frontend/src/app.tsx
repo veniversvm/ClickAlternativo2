@@ -1,67 +1,71 @@
-import { createSignal, Suspense } from "solid-js";
-import { MetaProvider, Title, Meta, Link } from "@solidjs/meta";
-import { Router, A } from "@solidjs/router";
+import { createSignal, ErrorBoundary, Suspense } from "solid-js";
+import { Link, MetaProvider } from "@solidjs/meta";
+import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
+import { Transition } from "solid-transition-group";
+import Header from "./components/Header/Header";
 import SideBarMenu from "./components/Menu/SideBarMenu";
-import NavLinks from "./components/Menu/NavLinks";
 import Footer from "./components/Footer/Footer";
 import "./styles/app.scss";
 
-export default function App() {
+// Componente interno separado para poder usar useLocation dentro del Router
+function AppShell(props: { children: any }) {
   const [isMenuOpen, setIsMenuOpen] = createSignal(false);
-
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen());
   const closeMenu = () => setIsMenuOpen(false);
+  const location = useLocation(); // necesita estar dentro del Router
 
   return (
-    <Router
-      root={(props) => (
-        <MetaProvider>
-          <div class="app-container">
-            {/* --- HEADER --- */}
-            <header class="main-header">
-              <A href="/" class="header-logo">Click Alternativo</A>
-              
-              {/* Botón Hamburguesa (Fijo en móvil por CSS) */}
-              <button
-                class="hamburger-button"
-                classList={{ "is-active": isMenuOpen() }}
-                onClick={toggleMenu}
-              >
-                <span class="line line1"></span>
-                <span class="line line2"></span>
-                <span class="line line3"></span>
-              </button>
+    <MetaProvider>
+    <Link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo.svg" />
+      <div class="app-container">
+        <Header isMenuOpen={isMenuOpen()} onToggleMenu={toggleMenu} />
+        <SideBarMenu isOpen={isMenuOpen()} onClose={closeMenu} />
+        <div
+          class="overlay"
+          classList={{ "is-visible": isMenuOpen() }}
+          onClick={closeMenu}
+        />
 
-              {/* Menú de escritorio */}
-              <nav class="desktop-nav">
-                <A href="/">
-                  <img src="/Logo/MiniLogo.svg" class="desktop-nav-image" alt="Logo" />
-                </A>
-                <NavLinks />
-              </nav>
-            </header>
+        <main class="main-content">
+          <ErrorBoundary
+            fallback={(err, reset) => (
+              <div class="critical-error">
+                <h2>Ups, algo salió mal</h2>
+                <p>
+                  El sitio sigue funcionando, pero esta sección no puede
+                  cargarse.
+                </p>
+                <div style={{ display: "flex", gap: "1rem" }}>
+                  <button onClick={reset}>Reintentar</button>
+                  <button onClick={() => (window.location.href = "/")}>
+                    Volver al Inicio
+                  </button>
+                </div>
+              </div>
+            )}
+          >
+            <Suspense fallback={<div class="loader">Cargando...</div>}>
+              <Transition name="page-fade" mode="outin">
+                {/* En Solid, el componente hijo debe ser una función para que Transition lo detecte */}
+                {(() => {
+                  const _path = location.pathname; // lee el signal para que Solid trackee el cambio
+                  return <div>{props.children}</div>;
+                })()}
+              </Transition>
+            </Suspense>
+          </ErrorBoundary>
+        </main>
 
-            {/* --- NAVEGACIÓN MÓVIL (Fuera del main) --- */}
-            <SideBarMenu isOpen={isMenuOpen()} onClose={closeMenu} />
-            
-            {/* Overlay: Reemplaza al selector ~ de Astro */}
-            <div 
-              class="overlay" 
-              classList={{ "is-visible": isMenuOpen() }} 
-              onClick={closeMenu} 
-            />
+        <Footer />
+      </div>
+    </MetaProvider>
+  );
+}
 
-            {/* --- CONTENIDO PRINCIPAL --- */}
-            <main>
-              <Suspense>{props.children}</Suspense>
-            </main>
-
-            <Footer />
-          </div>
-        </MetaProvider>
-      )}
-    >
+export default function App() {
+  return (
+    <Router root={(props) => <AppShell>{props.children}</AppShell>}>
       <FileRoutes />
     </Router>
   );

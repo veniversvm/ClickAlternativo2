@@ -1,123 +1,132 @@
-@use '../../styles/variables' as var;
+@use '~/styles/variables' as var;
 
-#about-us-section {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    color: var.$light-color;
-    font-family: var.$font-family;
-    line-height: 1.6;
+/* ======================================================
+   ABOUT US — Estética limpia y profesional
+   ====================================================== */
 
-    /* ===== HEADER ===== */
-    .about-us-header {
-        margin-bottom: 2.5rem;
-        text-align: center;
+.about-us-container { // Cambiado de ID a Clase para consistencia
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  color: var.$light-color;
+  font-family: var.$font-family;
+  line-height: 1.6;
 
-        .about-us-title {
-            font-size: 2.2rem;
-            color: var.$primary-color;
-            margin-bottom: 0.75rem;
+  /* ===== HEADER ===== */
+  .about-us-header {
+    margin-bottom: 4rem;
+    text-align: center;
+
+    .about-us-title {
+      font-family: var.$font-family-display;
+      font-size: 2.5rem;
+      color: var.$primary-color;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+
+    .about-us-intro {
+      font-size: 1.2rem;
+      max-width: 850px;
+      margin: 0 auto;
+      color: rgba(255, 255, 255, 0.95);
+    }
+  }
+
+  /* ===== ARTÍCULOS (Secciones) ===== */
+  .about-us-article {
+    margin-bottom: 4rem;
+    width: 100%;
+
+    .about-us-subtitle {
+      font-family: var.$font-family-display;
+      font-size: 1.8rem;
+      color: var.$primary-color;
+      margin-bottom: 1.5rem;
+      border-left: 5px solid var.$primary-color;
+      padding-left: 1rem;
+    }
+
+    .about-us-heading3 {
+      font-size: 1.3rem;
+      color: var.$primary-color;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+      font-weight: bold;
+    }
+
+    .about-us-text {
+      margin-bottom: 1.2rem;
+      color: #e0e0e0;
+      font-size: 1.05rem;
+    }
+
+    /* ===== LISTAS CON ICONO ===== */
+    .about-us-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 1.5rem 0;
+
+      .about-us-item {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        font-size: 1.05rem;
+
+        &::before {
+          content: '✔';
+          position: absolute;
+          left: 0;
+          color: var.$primary-color;
+          font-weight: bold;
         }
-
-        .about-us-intro {
-            font-size: 1.1rem;
-            max-width: 900px;
-            margin: 0 auto;
-            color: rgba(255, 255, 255, 0.9); // lig. suavizado
-        }
+      }
     }
+  }
 
-    /* ===== ARTICLE ===== */
-    .about-us-article {
-        margin-bottom: 2.5rem;
+  /* ===== RESALTADOS SEMÁNTICOS ===== */
+  .text-highlight {
+    color: var.$primary-color;
+    font-weight: bold;
+  }
 
-        .about-us-subtitle {
-            font-size: 1.6rem;
-            color: var.$primary-color;
-            margin-bottom: 1rem;
-            border-left: 4px solid var.$primary-color;
-            padding-left: 0.5rem;
-        }
+  .highlight-success {
+    color: #6BBF5B; // Verde Click Alternativo
+    font-weight: bold;
+  }
 
-        .about-us-heading3 {
-            font-size: 1.2rem;
-            color: var.$primary-color;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
+  .highlight-info {
+    color: #2196f3;
+    font-weight: bold;
+  }
 
-        .about-us-text {
-            margin-bottom: 1rem;
-            color: var.$light-color;
-        }
-
-        .about-us-list {
-            list-style: none;
-            padding-left: 0;
-
-            .about-us-item {
-                position: relative;
-                padding-left: 1.5rem;
-                margin-bottom: 0.75rem;
-
-                &::before {
-                    content: '✔';
-                    position: absolute;
-                    left: 0;
-                    color: var.$primary-color;
-                }
-            }
-        }
-    }
-
-    .highlight {
-        color: #ffcc00; // amarillo brillante
-        font-weight: bold;
-
-
-    }
-
-    /* ===== Frases destacadas ===== */
-    .highlight-danger {
-        color: #ff4d4d; // rojo
-        font-weight: bold;
-    }
-
-    .highlight-success {
-        color: #5e9653; // verde
-        font-weight: bold;
-    }
-
-    .highlight-info {
-        color: #2196f3; // azul
-        font-weight: bold;
-    }
-
-
-
-
-    /* ===== FOOTER ===== */
-    .about-us-footer {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        text-align: center;
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.8);
-    }
+  /* ===== FOOTER INTERNO ===== */
+  .about-us-footer {
+    margin-top: 5rem;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.7);
+  }
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== RESPONSIVE (SEO & Legibilidad) ===== */
 @media (min-width: 768px) {
-    #about-us-section {
-        padding: 3rem 2rem;
+  .about-us-container {
+    padding: 4rem 2rem;
 
-        .about-us-header .about-us-title {
-            font-size: 2.8rem;
-        }
-
-        .about-us-article .about-us-subtitle {
-            font-size: 1.8rem;
-        }
+    .about-us-header .about-us-title {
+      font-size: 3.5rem;
     }
+
+    .about-us-article .about-us-subtitle {
+      font-size: 2.2rem;
+    }
+
+    .about-us-text {
+      font-size: 1.1rem;
+    }
+  }
 }

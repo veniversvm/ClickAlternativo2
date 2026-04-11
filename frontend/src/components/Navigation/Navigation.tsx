@@ -1,4 +1,4 @@
-import { MenuButton } from '../Button/MenuButton';
+import  MenuButton  from '../Button/MenuButton';
 import { navLinks } from '../../data/navigation';
 import './Navigation.scss'
 

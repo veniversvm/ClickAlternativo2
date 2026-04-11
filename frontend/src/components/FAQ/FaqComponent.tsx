@@ -1,7 +1,9 @@
 import "./FaqComponent.scss";
 
-export const FAQ = () => {
-  <section id="section-faq" class="section-faq">
+export const FAQComponent = () => {
+  return (
+
+    <section id="section-faq" class="section-faq">
     <header class="section-faq__header">
       <h1 class="section-faq__title">
         FAQ
@@ -10,8 +12,7 @@ export const FAQ = () => {
       </h1>
       <p class="section-faq__intro">
         Encuentra respuestas claras y rápidas sobre cómo funciona
-        <span class="text-highlight">Click Alternativo</span>, el buscador
-        alternativo que prioriza la calidad sobre la cantidad, lo humano sobre
+        <span class="text-highlight"> Click Alternativo</span>,  que prioriza la calidad sobre la cantidad, lo humano sobre
         el algoritmo.
       </p>
     </header>
@@ -21,12 +22,11 @@ export const FAQ = () => {
         <h2 class="section-faq__question">¿Qué es Click Alternativo?</h2>
         <p class="section-faq__answer">
           Es un <span class="text-highlight">catálogo web manual</span> con
-          <span class="text-highlight">motor de búsqueda propio</span>. Cada
+          <span class="text-highlight"> motor de búsqueda propio </span>. Cada
           resultado es{" "}
           <span class="text-highlight">
             añadido, revisado, analizado y categorizado
-          </span>
-          por nuestro equipo humano, garantizando que recibas solo contenido
+          </span> por nuestro equipo humano, garantizando que recibas solo contenido
           útil y confiable.
         </p>
       </article>
@@ -81,5 +81,6 @@ export const FAQ = () => {
         </p>
       </article>
     </div>
-  </section>;
+  </section>
+  )
 };

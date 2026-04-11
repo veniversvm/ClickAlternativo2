@@ -4,7 +4,9 @@
    FAQ — estilos replicando la estética del About Us
    ====================================================== */
 
-#section-faq {
+.section-faq { // Cambiado de # a . para coincidir con tu class="section-faq"
+  display: block; // Asegura comportamiento vertical
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
@@ -13,7 +15,8 @@
   line-height: 1.6;
 
   /* ===== HEADER ===== */
-  .section-faq__header {
+  &__header {
+    display: block; // Asegura que el header ocupe todo el ancho
     margin-bottom: 2.5rem;
     text-align: center;
 
@@ -28,87 +31,52 @@
       font-size: 1.1rem;
       max-width: 900px;
       margin: 0 auto;
-      color: rgba(255, 255, 255, 0.9); // ligera suavización
+      color: rgba(255, 255, 255, 0.9);
     }
   }
 
   /* ===== CONTENIDO ===== */
-  .section-faq__container {
+  &__container {
+    display: flex;
+    flex-direction: column; // ESTO garantiza que los items no se pongan uno al lado del otro
+    gap: 2rem;              // Espacio entre preguntas
     max-width: 900px;
     margin: 0 auto;
   }
 
-  .section-faq__item {
-    margin-bottom: 2.5rem;
+  &__item {
+    display: block; // Cada item es un bloque vertical
+    width: 100%;
   }
 
-  .section-faq__question {
+  &__question {
     font-size: 1.6rem;
     color: var.$primary-color;
     margin-bottom: 1rem;
     border-left: 4px solid var.$primary-color;
-    padding-left: 0.5rem;
+    padding-left: 1rem;
   }
 
-  .section-faq__answer {
-    margin-bottom: 1rem;
+  &__answer {
     color: var.$light-color;
     line-height: 1.7;
     font-size: 1rem;
+    margin: 0;
   }
 
-  /* ===== LISTAS (si las hubiese) ===== */
-  .section-faq__list {
-    list-style: none;
-    padding-left: 0;
-
-    .section-faq__list-item {
-      position: relative;
-      padding-left: 1.5rem;
-      margin-bottom: 0.75rem;
-
-      &::before {
-        content: '✔';
-        position: absolute;
-        left: 0;
-        color: var.$primary-color;
-      }
-    }
-  }
-
-  /* ===== Resaltados (usar en spans en HTML) ===== */
+  /* ===== Resaltados ===== */
   .text-highlight {
     color: #5e9653;
-    font-weight: 700;
-  }
-
-  .text-highlight-default {
-    color: #ffcc00; // amarillo
-    font-weight: 700;
-  }
-
-  .text-highlight-danger {
-    color: #ff4d4d; // rojo
-    font-weight: 700;
-  }
-
-  .text-highlight-success {
-    color: #5e9653; // verde (coherente con el look)
-    font-weight: 700;
-  }
-
-  .text-highlight-info {
-    color: #2196f3; // azul
     font-weight: 700;
   }
 }
 
 /* ===== RESPONSIVE ===== */
 @media (min-width: 768px) {
-  #section-faq {
+  .section-faq {
     padding: 3rem 2rem;
 
-    .section-faq__header .section-faq__title {
+    &__header .section-faq__title {
       font-size: 2.8rem;
     }
 
