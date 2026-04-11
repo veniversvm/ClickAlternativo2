@@ -9,67 +9,63 @@ import Footer from "./components/Footer/Footer";
 import "./styles/app.scss";
 import { AuthProvider } from "./context/AuthContext";
 
-// Componente interno separado para poder usar useLocation dentro del Router
 function AppShell(props: { children: any }) {
   const [isMenuOpen, setIsMenuOpen] = createSignal(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen());
   const closeMenu = () => setIsMenuOpen(false);
-  const location = useLocation(); // necesita estar dentro del Router
+  const location = useLocation();
 
   return (
-    <AuthProvider>
-      <MetaProvider>
-        <Link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo.svg" />
-        <div class="app-container">
-          <Header isMenuOpen={isMenuOpen()} onToggleMenu={toggleMenu} />
-          <SideBarMenu isOpen={isMenuOpen()} onClose={closeMenu} />
-          <div
-            class="overlay"
-            classList={{ "is-visible": isMenuOpen() }}
-            onClick={closeMenu}
-          />
+    <MetaProvider>
+      <Link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo.svg" />
+      <div class="app-container">
+        <Header isMenuOpen={isMenuOpen()} onToggleMenu={toggleMenu} />
+        <SideBarMenu isOpen={isMenuOpen()} onClose={closeMenu} />
+        <div
+          class="overlay"
+          classList={{ "is-visible": isMenuOpen() }}
+          onClick={closeMenu}
+        />
 
-          <main class="main-content">
-            <ErrorBoundary
-              fallback={(err, reset) => (
-                <div class="critical-error">
-                  <h2>Ups, algo salió mal</h2>
-                  <p>
-                    El sitio sigue funcionando, pero esta sección no puede
-                    cargarse.
-                  </p>
-                  <div style={{ display: "flex", gap: "1rem" }}>
-                    <button onClick={reset}>Reintentar</button>
-                    <button onClick={() => (window.location.href = "/")}>
-                      Volver al Inicio
-                    </button>
-                  </div>
+        <main class="main-content">
+          <ErrorBoundary
+            fallback={(err, reset) => (
+              <div class="critical-error">
+                <h2>Ups, algo salió mal</h2>
+                <p>El sitio sigue funcionando, pero esta sección no puede cargarse.</p>
+                <div style={{ display: "flex", gap: "1rem" }}>
+                  <button onClick={reset}>Reintentar</button>
+                  <button onClick={() => (window.location.href = "/")}>
+                    Volver al Inicio
+                  </button>
                 </div>
-              )}
-            >
-              <Suspense fallback={<div class="loader">Cargando...</div>}>
-                <Transition name="page-fade" mode="outin">
-                  {/* En Solid, el componente hijo debe ser una función para que Transition lo detecte */}
-                  {(() => {
-                    const _path = location.pathname; // lee el signal para que Solid trackee el cambio
-                    return <div>{props.children}</div>;
-                  })()}
-                </Transition>
-              </Suspense>
-            </ErrorBoundary>
-          </main>
+              </div>
+            )}
+          >
+            <Suspense fallback={<div class="loader">Cargando...</div>}>
+              <Transition name="page-fade" mode="outin">
+                {(() => {
+                  const _path = location.pathname;
+                  return <div>{props.children}</div>;
+                })()}
+              </Transition>
+            </Suspense>
+          </ErrorBoundary>
+        </main>
 
-          <Footer />
-        </div>
-      </MetaProvider>
-    </AuthProvider>
+        <Footer />
+      </div>
+    </MetaProvider>
   );
 }
 
 export default function App() {
   return (
-    <Router root={(props) => <AppShell>{props.children}</AppShell>}>
-      <FileRoutes />
-    </Router>
+    // AuthProvider envuelve todo — se monta UNA sola vez y nunca se destruye
+    <AuthProvider>
+      <Router root={(props) => <AppShell>{props.children}</AppShell>}>
+        <FileRoutes />
+      </Router>
+    </AuthProvider>
   );
 }

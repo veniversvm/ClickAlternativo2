@@ -1,11 +1,15 @@
 import { createSignal, Show } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 import { SiGoogle } from "solid-icons/si";
 import { IoMailOutline, IoLockClosedOutline } from "solid-icons/io";
 import { authApi } from "~/lib/api";
+import { useAuth } from "~/context/AuthContext";
 import "./LoginForm.scss";
 
 export default function LoginForm() {
-  const [identifier, setIdentifier] = createSignal(""); // Puede ser email o username
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const [identifier, setIdentifier] = createSignal("");
   const [password, setPassword] = createSignal("");
   const [loading, setLoading] = createSignal(false);
   const [message, setMessage] = createSignal<{ type: 'success' | 'error', text: string } | null>(null);
@@ -15,32 +19,30 @@ export default function LoginForm() {
     setLoading(true);
     setMessage(null);
 
-    // Usamos el motor authApi que ya tiene el failsafe
-    const result = await authApi.login({ 
-      identifier: identifier(), 
-      password: password() 
+    const result = await authApi.login({
+      identifier: identifier(),
+      password: password()
     });
 
     if (!result) {
-      // API CAÍDA
-      setMessage({ 
-        type: 'error', 
-        text: "No podemos conectar con el servidor de acceso. Por favor, intenta más tarde." 
+      setMessage({
+        type: 'error',
+        text: "No podemos conectar con el servidor de acceso. Por favor, intenta más tarde."
       });
     } else if (result.error) {
-      // CREDENCIALES INVÁLIDAS
       setMessage({ type: 'error', text: result.message });
     } else {
-      // ÉXITO: El backend ya envió la HttpOnly Cookie
-      setMessage({ type: 'success', text: "¡Bienvenido de nuevo! Entrando..." });
-      setTimeout(() => window.location.href = "/", 1500);
+      // Refetch del resource para que Header y Sidebar se actualicen
+      await auth.refetch();
+      setMessage({ type: 'success', text: "¡Bienvenido de nuevo!" });
+      // Navegación SPA — sin recargar la página
+      navigate("/");
     }
 
     setLoading(false);
   };
 
   const handleGoogleLogin = () => {
-    // Redirección directa al flujo de Go + Google
     window.location.href = authApi.getGoogleLoginUrl();
   };
 
@@ -49,7 +51,6 @@ export default function LoginForm() {
       <h2>Iniciar Sesión</h2>
       <p class="auth-subtitle">Accede a tus preferencias de curaduría</p>
 
-      {/* Botón de Google */}
       <button class="google-btn" onClick={handleGoogleLogin}>
         <SiGoogle size={20} />
         Entrar con Google
@@ -59,28 +60,27 @@ export default function LoginForm() {
         <span>o usa tu cuenta</span>
       </div>
 
-      {/* Formulario Manual */}
       <form onSubmit={handleManualLogin} class="manual-form">
         <div class="input-group">
           <IoMailOutline class="input-icon" />
-          <input 
-            type="text" 
-            placeholder="Email o Usuario" 
+          <input
+            type="text"
+            placeholder="Email o Usuario"
             value={identifier()}
             onInput={(e) => setIdentifier(e.currentTarget.value)}
-            required 
+            required
             disabled={loading()}
           />
         </div>
 
         <div class="input-group">
           <IoLockClosedOutline class="input-icon" />
-          <input 
-            type="password" 
-            placeholder="Tu contraseña" 
+          <input
+            type="password"
+            placeholder="Tu contraseña"
             value={password()}
             onInput={(e) => setPassword(e.currentTarget.value)}
-            required 
+            required
             disabled={loading()}
           />
         </div>
@@ -94,10 +94,6 @@ export default function LoginForm() {
         <button type="submit" class="submit-btn" disabled={loading()}>
           {loading() ? "Verificando..." : "Entrar ahora"}
         </button>
-        
-        {/* <p class="auth-footer-text">
-          ¿No tienes cuenta? <a href="/suscribirse">Regístrate aquí</a>
-        </p> */}
       </form>
     </div>
   );

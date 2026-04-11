@@ -1,5 +1,4 @@
 import { createContext, useContext, createResource, JSX } from "solid-js";
-import { isServer } from "solid-js/web";
 import { userApi, authApi } from "~/lib/api";
 
 const AuthContext = createContext<any>();
@@ -7,12 +6,11 @@ const AuthContext = createContext<any>();
 export function AuthProvider(props: { children: JSX.Element }) {
   const [user, { mutate, refetch }] = createResource(
     async () => {
-      if (isServer) return undefined;
       const data = await userApi.getProfile();
       if (!data || data.error) return null;
       return data;
     },
-    { deferStream: true }  // ← clave: no bloquea el stream SSR
+    { deferStream: true }
   );
 
   const logout = async () => {
@@ -21,8 +19,16 @@ export function AuthProvider(props: { children: JSX.Element }) {
     window.location.href = "/";
   };
 
+  const login = async (credentials: any) => {
+    const result = await authApi.login(credentials);
+    if (result && !result.error) {
+      await refetch(); // actualiza el estado de auth inmediatamente
+    }
+    return result;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, logout, refetch }}>
+    <AuthContext.Provider value={{ user, logout, login, refetch }}>
       {props.children}
     </AuthContext.Provider>
   );
