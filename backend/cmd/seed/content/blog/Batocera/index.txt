@@ -1,0 +1,19 @@
+---
+title: Batocera
+pubDate: '2022-07-01'
+description: El linux para el jugador retro.
+author: Luigi Skull
+tags:
+  - Software
+  - Gaming
+  - Linux
+  - Opensource
+externalUrl: 'https://batocera.org/'
+coverImage: /blog/batocera/batocera/1BAT.jpg
+---
+
+
+### Veamos qué es batocera.
+
+
+Batocera.linux es una distribución de retrojuegos de código abierto y completamente gratuita que se puede copiar en una memoria USB o una tarjeta SD. Su objetivo es transformar cualquier computadora  en una consola de videojuegos, ya sea de forma temporal para una partida o de manera permanente. Lo mejor de todo es que no requiere modificar tu equipo, lo que la convierte en el aliado perfecto para crear tu propia consola retro DIY.

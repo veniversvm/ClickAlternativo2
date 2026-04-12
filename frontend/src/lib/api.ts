@@ -105,3 +105,29 @@ export const userApi = {
   updateProfile: (data: { notify_email: boolean; notify_push: boolean; tag_ids: number[] }) => 
     request("/user/profile", { method: "PUT", body: JSON.stringify(data) }),
 };
+
+export const adminApi = {
+  login: (credentials: { email: string; password: string }) =>
+    request("/auth/admin/login", { method: "POST", body: JSON.stringify(credentials) }),
+
+  logout: () =>
+    request("/auth/admin/logout", { method: "POST" }),
+
+  createCategory: (data: { name: string }) =>
+    request("/admin/categories", { method: "POST", body: JSON.stringify(data) }),
+
+  updateCategory: (id: number, data: { name: string }) =>
+    request(`/admin/categories/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+
+  deleteCategory: (id: number) =>
+    request(`/admin/categories/${id}`, { method: "DELETE" }),
+
+  createEntry: (data: any) =>
+    request("/admin/entries", { method: "POST", body: JSON.stringify(data) }),
+
+  updateEntry: (id: string, data: any) =>
+    request(`/admin/entries/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+
+  deleteEntry: (id: string) =>
+    request(`/admin/entries/${id}`, { method: "DELETE" }),
+};

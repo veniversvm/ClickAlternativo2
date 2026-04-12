@@ -1,39 +1,38 @@
 import { Show } from "solid-js";
 import { A } from "@solidjs/router";
-import "./PostCard.scss"; // Importamos tus estilos SCSS reciclados
+import "./PostCard.scss";
 
 interface PostCardProps {
   slug: string;
   title: string;
   description: string;
-  image_url1?: string | null;
-  created_at: string;
+  image_url_1?: string | null;
+  CreatedAt: string;
   content_url?: string | null;
-  category?: string; // Para construir la URL dinámica /seccion/slug
+  categories?: { id: number; name: string; slug: string; type: string }[];
 }
 
 export default function PostCard(props: PostCardProps) {
-  // Formateo de fecha reactivo
-  const formattedDate = () => {
-    return new Date(props.created_at).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+  console.log(props)
+  const formattedDate = () =>
+    new Date(props.CreatedAt).toLocaleDateString("es-ES", {
+      year: "numeric", month: "long", day: "numeric",
     });
-  };
 
-  // Construimos la URL interna. Si no hay categoría, usamos 'blog' por defecto
-  const detailUrl = () => `/${props.category || 'blog'}/${props.slug}`;
+  // Tomar la primera categoría primaria para construir la URL
+  const primaryCategory = () =>
+    props.categories?.find((c) => c.type === "primary")?.slug
+    ?? props.categories?.[0]?.slug
+    ?? "blog";
+
+  const detailUrl = () => `/${primaryCategory()}/${props.slug}`;
 
   return (
     <div class="post-card">
       <A href={detailUrl()} class="card-image-link" aria-label={`Leer más sobre ${props.title}`}>
-        <Show 
-          when={props.image_url1} 
-          fallback={<div class="image-placeholder"></div>}
-        >
+        <Show when={props.image_url_1} fallback={<div class="image-placeholder" />}>
           <img
-            src={props.image_url1!}
+            src={props.image_url_1!}
             alt={`Imagen de portada para ${props.title}`}
             class="card-image"
             loading="lazy"
@@ -46,21 +45,11 @@ export default function PostCard(props: PostCardProps) {
         <A href={detailUrl()} class="card-title-link">
           <h2>{props.title}</h2>
         </A>
-        
         <p>{props.description}</p>
-        
-        <time datetime={props.created_at}>
-          {formattedDate()}
-        </time>
-
+        <time datetime={props.CreatedAt}>{formattedDate()}</time>
         <Show when={props.content_url}>
           <div class="external-link-wrapper">
-            <a 
-              href={props.content_url!} 
-              class="external-button" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
+            <a href={props.content_url!} class="external-button" target="_blank" rel="noopener noreferrer">
               Visitar Página →
             </a>
           </div>

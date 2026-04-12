@@ -1,67 +1,195 @@
 @use "~/styles/variables" as var;
 
 .settings-card {
-  background: rgba(30, 30, 30, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(var.$primary-color, 0.3);
-  border-radius: 20px;
-  padding: 2.5rem;
-  max-width: 600px;
+  max-width: 640px;
   margin: 2rem auto;
+  padding: 2rem;
+  background: #1a1a1a;
+  border-radius: 16px;
+  border: 1px solid rgba(var.$primary-color, 0.2);
   color: white;
+}
 
-  .settings-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    .settings-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var.$primary-color; margin-bottom: 1rem; }
-    h2 { font-family: var.$font-family-display; font-size: 2rem; margin: 0; }
-    p { color: #888; font-size: 0.9rem; }
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-avatar-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var.$primary-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.settings-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.settings-avatar-letter {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #000;
+}
+
+.settings-user-info {
+  h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.3rem;
+    color: var.$primary-color;
   }
 
-  .settings-section {
-    margin-bottom: 2rem;
-    h3 { border-bottom: 1px solid #444; padding-bottom: 0.5rem; margin-bottom: 1.5rem; color: var.$primary-color; }
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.6;
+  }
+}
+
+.settings-section {
+  margin-bottom: 2rem;
+
+  h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var.$primary-color;
+    margin: 0 0 1rem;
+    opacity: 0.8;
+  }
+}
+
+.section-hint {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  margin: 0 0 1rem;
+}
+
+/* Toggle switches */
+.setting-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  user-select: none;
+
+  span:first-child {
+    font-size: 0.95rem;
   }
 
-  .setting-item {
-    margin-bottom: 1rem;
-    label { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    input[type="checkbox"] { accent-color: var.$primary-color; width: 20px; height: 20px; }
+  input[type="checkbox"] {
+    display: none;
   }
 
-  .tags-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    .tag-pill-btn {
-      padding: 0.5rem 1rem;
-      border-radius: 50px;
-      border: 1px solid #555;
-      background: transparent;
-      color: #ccc;
-      cursor: pointer;
-      transition: all 0.2s;
-      &.active {
-        background: var.$primary-color;
-        color: black;
-        border-color: var.$primary-color;
-        font-weight: bold;
-      }
+  input:checked + .toggle-track {
+    background: var.$primary-color;
+
+    .toggle-thumb {
+      transform: translateX(18px);
     }
   }
+}
 
-  .save-btn {
-    width: 100%;
-    padding: 1rem;
-    background: var.$primary-color;
-    color: black;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    cursor: pointer;
-    &:disabled { opacity: 0.5; }
+.toggle-track {
+  width: 38px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+/* Tags */
+.tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-pill-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  border: 1px solid rgba(var.$primary-color, 0.4);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: var.$primary-color;
+    color: white;
   }
 
-  .status-msg { text-align: center; color: var.$primary-color; margin-bottom: 1rem; font-weight: bold; }
+  &.active {
+    background: var.$primary-color;
+    border-color: var.$primary-color;
+    color: #000;
+    font-weight: bold;
+  }
+}
+
+/* Footer */
+.settings-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-msg {
+  font-size: 0.9rem;
+  margin: 0;
+
+  &.success { color: var.$primary-color; }
+  &.error { color: #ff4757; }
+}
+
+.save-btn {
+  background: var.$primary-color;
+  color: #000;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
