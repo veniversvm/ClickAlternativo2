@@ -3,32 +3,26 @@ import { Title, Meta, Link } from "@solidjs/meta";
 import { For, Show, Suspense, createMemo } from "solid-js";
 import { blogApi } from "~/lib/api";
 import Carousel from "~/components/Carousel/Carousel";
+import { marked } from "marked"; // Importamos el parser
 import "~/styles/blogpost.scss";
 
 export default function PostDetailPage() {
   const params = useParams();
-  
-  // 1. Pedimos los datos del post (SSR automático)
   const post = createAsync(() => blogApi.getBySlug(params.slug ?? ""));
 
-  // 2. Memoizamos las imágenes para el Carousel
   const postImages = createMemo(() => {
     const data = post();
     if (!data) return [];
     return [data.image_url_1, data.image_url_2, data.image_url_3].filter(Boolean) as string[];
   });
 
-  // 3. Limpiamos el hostname para el botón de visita
   const displayUrl = createMemo(() => {
     try {
       const url = post()?.content_url;
       return url ? new URL(url).hostname.replace(/^www\./, "") : "";
-    } catch {
-      return "";
-    }
+    } catch { return ""; }
   });
 
-  // 4. Función de fecha segura para evitar "Invalid Date"
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "Reciente";
     const d = new Date(dateStr);
@@ -37,28 +31,24 @@ export default function PostDetailPage() {
     });
   };
 
+  // --- NUEVA FUNCIÓN: Transforma Markdown a HTML ---
+  const renderedContent = createMemo(() => {
+    const content = post()?.content;
+    if (!content) return "";
+    return marked.parse(content); // Convierte ### en <h3>, etc.
+  });
+
   return (
     <Suspense fallback={<div class="page-loader">Preparando curaduría...</div>}>
-      <Show when={post()} fallback={
-        <div class="content-not-found">
-          <h1>404</h1>
-          <p>Lo sentimos, este contenido no está disponible.</p>
-          <A href="/">Volver al inicio</A>
-        </div>
-      }>
+      <Show when={post()} fallback={<div class="content-not-found"><h1>404</h1><A href="/">Volver</A></div>}>
         <article class="blog-post-container">
-          {/* SEO Dinámico */}
           <Title>{post()!.title} | Click Alternativo</Title>
           <Meta name="description" content={post()!.description} />
-          <Meta property="og:image" content={post()!.image_url_1} />
           <Link rel="canonical" href={`https://clickalternativo.com/${params.category}/${post()!.slug}`} />
 
           <div class="post-detail-layout">
-            {/* COLUMNA VISUAL (Izquierda) */}
             <div class="post-visual-side">
               <Carousel images={postImages()} />
-              
-              {/* Botón de Visita Simple (Sustituye a las flechas) */}
               <div class="navigation-wrapper-simple">
                 <a href={post()!.content_url} target="_blank" rel="noopener noreferrer" class="visit-button-full">
                   VISITAR {displayUrl().toUpperCase()}
@@ -66,27 +56,32 @@ export default function PostDetailPage() {
               </div>
             </div>
 
-            {/* COLUMNA DE INFORMACIÓN (Derecha) */}
             <div class="post-info-side">
               <header class="post-header">
                 <h1 class="post-title">{post()!.title}</h1>
                 <p class="post-date">Curado el {formatDate(post()!.created_at)}</p>
               </header>
 
-              <div class="post-description-body">
+              {/* Descripción corta destacada */}
+              <div class="post-description-lead">
                 <p>{post()!.description}</p>
               </div>
 
-              {/* Sección de Etiquetas con Grid/Flex corregido */}
+              {/* CUERPO DEL CONTENIDO (Markdown renderizado) */}
+              <Show when={post()!.content}>
+                <div 
+                  class="post-main-content" 
+                  innerHTML={renderedContent() as string} 
+                />
+              </Show>
+
               <Show when={post()!.categories?.length > 0}>
                 <div class="tags-section">
                   <h3 class="tags-title">RELEVANCIA</h3>
                   <div class="tags-container-flex">
                     <For each={post()!.categories}>
                       {(cat) => (
-                        <A href={`/${cat.slug}`} class="tag-pill">
-                          {cat.name.toUpperCase()}
-                        </A>
+                        <A href={`/${cat.slug}`} class="tag-pill">{cat.name.toUpperCase()}</A>
                       )}
                     </For>
                   </div>

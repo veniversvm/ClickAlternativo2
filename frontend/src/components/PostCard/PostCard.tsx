@@ -13,47 +13,31 @@ interface PostCardProps {
 }
 
 export default function PostCard(props: PostCardProps) {
-  console.log(props)
-  const formattedDate = () =>
-    new Date(props.CreatedAt).toLocaleDateString("es-ES", {
-      year: "numeric", month: "long", day: "numeric",
-    });
+  // Manejo de fecha para evitar "Invalid Date"
+  const date = () => {
+    const d = new Date(props.CreatedAt);
+    return isNaN(d.getTime()) ? "Reciente" : d.toLocaleDateString();
+  };
 
-  // Tomar la primera categoría primaria para construir la URL
-  const primaryCategory = () =>
-    props.categories?.find((c) => c.type === "primary")?.slug
-    ?? props.categories?.[0]?.slug
-    ?? "blog";
+  // El backend envía image_url1 (según tu Select en Go)
+  const image = () => props.image_url_1 ?? undefined;
 
-  const detailUrl = () => `/${primaryCategory()}/${props.slug}`;
+  // Construcción de la URL: /categoria/slug
+  const category = () => props.categories?.[0]?.slug || "blog";
 
   return (
     <div class="post-card">
-      <A href={detailUrl()} class="card-image-link" aria-label={`Leer más sobre ${props.title}`}>
-        <Show when={props.image_url_1} fallback={<div class="image-placeholder" />}>
-          <img
-            src={props.image_url_1!}
-            alt={`Imagen de portada para ${props.title}`}
-            class="card-image"
-            loading="lazy"
-            decoding="async"
-          />
+      <A href={`/${category()}/${props.slug}`} class="card-image-link">
+        <Show when={image()} fallback={<div class="image-placeholder" />}>
+          <img src={image()} alt={props.title} class="card-image" loading="lazy" />
         </Show>
       </A>
-
       <div class="card-content">
-        <A href={detailUrl()} class="card-title-link">
+        <A href={`/${category()}/${props.slug}`} class="card-title-link">
           <h2>{props.title}</h2>
         </A>
         <p>{props.description}</p>
-        <time datetime={props.CreatedAt}>{formattedDate()}</time>
-        <Show when={props.content_url}>
-          <div class="external-link-wrapper">
-            <a href={props.content_url!} class="external-button" target="_blank" rel="noopener noreferrer">
-              Visitar Página →
-            </a>
-          </div>
-        </Show>
+        <time>{date()}</time>
       </div>
     </div>
   );

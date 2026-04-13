@@ -1,12 +1,130 @@
 @use "~/styles/variables" as var;
 
-.post-date {
-  color: #aaa;
-  font-size: 0.95rem;
-  margin-top: -0.5rem;
-  margin-bottom: 2rem;
+.blog-post-container {
+  max-width: 1400px; // El contenedor general puede ser más amplio
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
 }
 
+/* --- LAYOUT DE 2 COLUMNAS --- */
+.post-detail-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.post-visual-side {
+  flex: 1.2;
+  @media (min-width: 1024px) {
+    position: sticky;
+    top: 100px;
+    padding-right: 2rem; // Espacio entre las columnas
+  }
+}
+
+.post-info-side {
+  flex: 1;
+  max-width: 800px; // Limita el ancho del texto en PC
+  margin: 0 auto;   // CENTRA EL TEXTO EN PC
+
+  @media (min-width: 1024px) {
+    margin: 0; // En PC, la columna se pega a la izquierda de su flex container
+  }
+
+  .post-header {
+    text-align: center; // Centra el título y la fecha
+    margin-bottom: 2rem;
+  }
+
+  .post-title {
+    font-family: var.$font-family-display;
+    font-size: 2.8rem;
+    color: var.$primary-color;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .post-date {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+
+  .post-description-lead {
+    font-size: 1.25rem;
+    color: var.$primary-color;
+    font-weight: 500;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    font-style: italic;
+    border-left: 3px solid var.$primary-color;
+    padding-left: 1.5rem;
+  }
+
+  .post-content-body {
+    color: #e0e0e0;
+    line-height: 1.8;
+    font-size: 1.1rem;
+
+    h3, h4 {
+      color: white;
+      font-family: var.$font-family-display;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    h3 { font-size: 1.8rem; }
+    h4 { font-size: 1.4rem; }
+
+    p { margin-bottom: 1.5rem; }
+    ul, ol { margin-bottom: 1.5rem; padding-left: 1.5rem; li { margin-bottom: 0.5rem; } }
+  }
+
+  /* --- SECCIÓN DE ETIQUETAS --- */
+  .tags-section {
+    margin-top: 3rem;
+    border-top: 1px solid #333;
+    padding-top: 1.5rem;
+    text-align: center; // Centra el título y los tags
+
+    .tags-title {
+      font-family: var.$font-family-display;
+      color: white;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .tags-container-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center; // CENTRA LOS TAGS EN PC
+    }
+
+    .tag-pill {
+      display: inline-block;
+      color: var.$primary-color;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem;
+      background: rgba(var.$primary-color, 0.1);
+      border-radius: 4px;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s;
+      &:hover { background: var.$primary-color; color: black; }
+    }
+  }
+}
+
+/* --- BOTÓN VISITAR --- */
 .navigation-wrapper-simple {
   display: flex;
   justify-content: center;
@@ -27,43 +145,4 @@
   font-size: 1.1rem;
   transition: transform 0.2s ease;
   &:hover { transform: scale(1.03); }
-}
-
-/* --- FIX PARA LAS ETIQUETAS --- */
-.tags-section {
-  margin-top: 3rem;
-  border-top: 1px solid #333;
-  padding-top: 1.5rem;
-
-  .tags-title {
-    font-family: var.$font-family-display;
-    color: white;
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    letter-spacing: 1px;
-  }
-}
-
-.tags-container-flex {
-  display: flex;
-  flex-wrap: wrap; // Permite que las tags bajen a la siguiente línea
-  gap: 0.75rem;     // Espacio entre tags
-}
-
-.tag-pill {
-  display: inline-block;
-  color: var.$primary-color;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.85rem;
-  padding: 0.4rem 0.8rem;
-  background: rgba(var.$primary-color, 0.1);
-  border-radius: 4px;
-  border-bottom: 1px solid transparent;
-  transition: all 0.2s;
-
-  &:hover {
-    background: var.$primary-color;
-    color: black;
-  }
 }

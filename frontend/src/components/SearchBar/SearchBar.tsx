@@ -5,28 +5,18 @@ interface SearchProps {
   size?: 'small' | 'large';
 }
 
-export const Search = (props: SearchProps) => {
+export const Search = (props: SearchProps ) => {
   return (
-    <div 
-      class="search-wrapper" 
-      classList={{ "search-wrapper--small": props.size === 'small' }}
-    >
-      {/* 
-        SolidStart intercepta este formulario. Al enviarlo, 
-        navegará a /search?q=lo-que-escribas 
-      */}
-      <form class="search-form" action="/search" method="get">
+    <div class="search-wrapper" classList={{ "search-wrapper--small": props.size === 'small' }}>
+      <form action="/search" method="get" class="search-form">
         <input
           type="search"
-          name="q"
-          placeholder="Buscar en el sitio..."
-          aria-label="Campo de búsqueda"
+          name="search" // <--- DEBE SER "search"
+          placeholder="Buscar curadurías..."
           class="search-input"
           required
         />
-        <button type="submit" class="search-button" aria-label="Buscar">
-          <IoSearch size={22} />
-        </button>
+        <button type="submit" class="search-button">🔍</button>
       </form>
     </div>
   );

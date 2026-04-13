@@ -12,6 +12,7 @@ type Entry struct {
 	Title       string    `gorm:"not null" json:"title"`
 	Slug        string    `gorm:"uniqueIndex;not null" json:"slug"`
 	Description string    `json:"description"`
+	Content     string    `json:"content"`
 	ContentURL  string    `json:"content_url"`
 	// Tres imágenes posibles
 	ImageURL1 string `json:"image_url_1"` // Principal

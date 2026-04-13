@@ -70,17 +70,22 @@ type Frontmatter struct {
 func parseFrontmatter(content string) Frontmatter {
 	fm := Frontmatter{}
 
-	start := strings.Index(content, "---")
-	if start == -1 {
-		return fm
-	}
-	end := strings.Index(content[start+3:], "---")
-	if end == -1 {
+	// start := strings.Index(content, "---")
+	// if start == -1 {
+	// 	return fm
+	// }
+	// end := strings.Index(content[start+3:], "---")
+	// if end == -1 {
+	// 	return fm
+	// }
+
+	parts := strings.Split(content, "---")
+	if len(parts) < 3 {
 		return fm
 	}
 
-	block := content[start+3 : start+3+end]
-
+	// block := content[start+3 : start+3+end]
+	block := parts[1]
 	for _, line := range strings.Split(block, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
@@ -116,6 +121,15 @@ func parseFrontmatter(content string) Frontmatter {
 	}
 
 	return fm
+}
+
+func extractBody(content string) string {
+	parts := strings.Split(content, "---")
+	if len(parts) < 3 {
+		return ""
+	}
+	// Parts[2] es todo lo que sigue al frontmatter
+	return strings.TrimSpace(parts[2])
 }
 
 //  S3
@@ -328,7 +342,10 @@ func main() {
 			continue
 		}
 
-		fm := parseFrontmatter(string(raw))
+		rawStr := string(raw)
+		fm := parseFrontmatter(rawStr)
+		contentBody := extractBody(rawStr)
+
 		if fm.Title == "" {
 			log.Printf("⚠️  Sin título en %s, saltando", entry.Name())
 			skipCount++
@@ -408,6 +425,7 @@ func main() {
 			Slug:        entrySlug,
 			Description: fm.Description,
 			ContentURL:  fm.ExternalURL,
+			Content:     contentBody,
 			Categories:  categories,
 		}
 
