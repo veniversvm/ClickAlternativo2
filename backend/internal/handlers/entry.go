@@ -91,45 +91,57 @@ func (h *EntryHandler) Delete(c *fiber.Ctx) error {
 }
 
 func (h *EntryHandler) GetPaginated(c *fiber.Ctx) error {
-	// 1. Parámetros de consulta
 	page, _ := strconv.Atoi(c.Query("page", "1"))
-	search := c.Query("search", "")
-	tagSlug := c.Query("tag", "") // Filtrar por el slug de la categoría
+	search := strings.TrimSpace(c.Query("search", ""))
+	tagSlug := strings.TrimSpace(c.Query("tag", ""))
 
 	limit := 20
 	offset := (page - 1) * limit
 
-	// 2. Construir la consulta base
-	// Seleccionamos solo los campos necesarios (Lean Response)
+	// 1. Iniciamos la consulta con DISTINCT para evitar filas duplicadas al hacer Joins
+	// Seleccionamos solo los campos necesarios para el feed (Lean Response)
 	query := h.DB.Model(&models.Entry{}).
-		Select("entries.id", "entries.title", "entries.slug", "entries.description", "entries.image_url1", "entries.created_at").
-		Preload("Categories", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id", "name", "slug", "type") // Campos mínimos de tags
-		})
+		Select("DISTINCT entries.id, entries.title, entries.slug, entries.description, entries.image_url1, entries.created_at")
 
-	// 3. Filtro de Búsqueda General (Título y Descripción)
+	// 2. Lógica de Búsqueda Expandida (Título, Descripción o Tag)
 	if search != "" {
-		query = query.Where("entries.title ILIKE ? OR entries.description ILIKE ?", "%"+search+"%", "%"+search+"%")
+		searchPattern := "%" + strings.ToLower(search) + "%"
+
+		// Usamos Joins para incluir los nombres de las categorías en la búsqueda
+		query = query.Joins("LEFT JOIN entry_categories ec ON ec.entry_id = entries.id").
+			Joins("LEFT JOIN categories c ON c.id = ec.category_id").
+			Where("(LOWER(entries.title) LIKE ? OR LOWER(entries.description) LIKE ? OR LOWER(c.name) LIKE ?)",
+				searchPattern, searchPattern, searchPattern)
 	}
 
-	// 4. Filtro por Tag (Si existe el parámetro tag)
+	// 3. Filtro estricto por Tag (Si se navega por una sección específica)
 	if tagSlug != "" {
-		// Hacemos un Join con la tabla intermedia y la de categorías
-		query = query.Joins("JOIN entry_categories ON entry_categories.entry_id = entries.id").
-			Joins("JOIN categories ON categories.id = entry_categories.category_id").
-			Where("categories.slug = ?", tagSlug)
+		// Reutilizamos el join si no se ha hecho en el search
+		if search == "" {
+			query = query.Joins("JOIN entry_categories ec_filter ON ec_filter.entry_id = entries.id").
+				Joins("JOIN categories c_filter ON c_filter.id = ec_filter.category_id").
+				Where("c_filter.slug = ?", tagSlug)
+		} else {
+			// Si ya hay búsqueda, simplemente añadimos la condición de slug al join existente
+			query = query.Where("c.slug = ?", tagSlug)
+		}
 	}
 
-	// 5. Ejecutar con paginación
+	// 4. Ejecución con Orden y Paginación
 	var entries []models.Entry
-	if err := query.Order("entries.created_at desc").
+	err := query.
+		Preload("Categories", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name", "slug", "type")
+		}).
+		Order("entries.created_at DESC"). // Siempre lo más nuevo primero
 		Limit(limit).
 		Offset(offset).
-		Find(&entries).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Error al obtener datos"})
+		Find(&entries).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Error al consultar la base de datos"})
 	}
 
-	// 6. Metadata de paginación (Opcional, muy útil para el frontend)
 	return c.JSON(fiber.Map{
 		"page":    page,
 		"limit":   limit,
