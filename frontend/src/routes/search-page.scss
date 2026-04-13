@@ -1,0 +1,35 @@
+@use "~/styles/variables" as var;
+
+.infinite-scroll-trigger {
+  padding: 4rem 0;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.end-message {
+  color: #666;
+  font-family: var.$font-family-display;
+  letter-spacing: 1px;
+}
+
+/* Animación de carga (Dots) */
+.loader-dots {
+  display: flex;
+  gap: 8px;
+  span {
+    width: 10px;
+    height: 10px;
+    background-color: var.$primary-color;
+    border-radius: 50%;
+    animation: bounce 0.6s infinite alternate;
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-10px); }
+}
