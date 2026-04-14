@@ -27,6 +27,9 @@ WORKDIR /app/
 # Copiar solo el binario desde la etapa de compilación
 COPY --from=builder /app/api .
 
+# COPIAR LA CARPETA DE LOGOS (Si no está, el código dará error)
+COPY assets ./assets 
+
 # Exponer el puerto
 EXPOSE 8080
 

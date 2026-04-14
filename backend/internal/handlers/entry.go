@@ -13,40 +13,58 @@ import (
 )
 
 type EntryHandler struct {
-	DB *gorm.DB
-	S3 *services.S3Service
+	DB           *gorm.DB
+	S3           *services.S3Service
+	Notification *services.NotificationService
 }
 
 func (h *EntryHandler) Create(c *fiber.Ctx) error {
+	// 1. Parsear el formulario multipart
 	form, err := c.MultipartForm()
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "Error en el formulario"})
 	}
 
-	title := c.FormValue("title")
+	// 2. Recuperar valores de texto
+	title := strings.TrimSpace(c.FormValue("title"))
+	description := strings.TrimSpace(c.FormValue("description"))
+	contentBody := strings.TrimSpace(c.FormValue("content"))
+	contentURL := strings.TrimSpace(c.FormValue("content_url"))
+	categoryIDsRaw := strings.TrimSpace(c.FormValue("category_ids")) // Espera "1,2,5"
+
+	// --- REGLA DE NEGOCIO: VALIDACIÓN DE CAMPOS OBLIGATORIOS ---
+	if title == "" || description == "" || contentBody == "" || categoryIDsRaw == "" {
+		return c.Status(400).JSON(fiber.Map{"error": "Título, descripción, contenido y al menos una categoría son obligatorios"})
+	}
+
 	entry := models.Entry{
 		Title:       title,
 		Slug:        utils.Slugify(title),
-		Description: c.FormValue("description"),
-		ContentURL:  c.FormValue("content_url"),
+		Description: description,
+		Content:     contentBody,
+		ContentURL:  contentURL,
 	}
 
-	// Procesar hasta 3 imágenes: campos "image1", "image2", "image3"
+	// 3. Procesar Imágenes (Al menos la primera es obligatoria)
+	imageCount := 0
 	for i := 1; i <= 3; i++ {
 		fieldName := fmt.Sprintf("image%d", i)
 		files := form.File[fieldName]
+
 		if len(files) > 0 {
 			fileHeader := files[0]
 			file, _ := fileHeader.Open()
 
-			// --- LIMPIEZA Y COMPRESIÓN ---
+			// Limpieza y Compresión (Servicio ya implementado)
 			cleanReader, contentType, err := services.ProcessImage(file, fileHeader.Size)
 			if err != nil {
-				return c.Status(400).JSON(fiber.Map{"error": "Imagen " + fieldName + " inválida"})
+				file.Close()
+				return c.Status(400).JSON(fiber.Map{"error": "Imagen " + fieldName + " inválida o corrupta"})
 			}
 
 			url, err := h.S3.UploadImage(cleanReader, fileHeader.Filename, contentType)
 			if err == nil {
+				imageCount++
 				if i == 1 {
 					entry.ImageURL1 = url
 				}
@@ -61,13 +79,41 @@ func (h *EntryHandler) Create(c *fiber.Ctx) error {
 		}
 	}
 
-	// Categorías... (mismo código de antes)
-
-	if err := h.DB.Create(&entry).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Error al guardar"})
+	// --- REGLA DE NEGOCIO: AL MENOS UNA IMAGEN ---
+	if imageCount == 0 {
+		return c.Status(400).JSON(fiber.Map{"error": "Debes subir al menos una imagen (image1)"})
 	}
+
+	// 4. Procesar Categorías (Relación M:N)
+	var categories []models.Category
+	rawIds := strings.Split(categoryIDsRaw, ",")
+	var cleanIds []string
+	for _, id := range rawIds {
+		cleanIds = append(cleanIds, strings.TrimSpace(id))
+	}
+
+	if err := h.DB.Where("id IN ?", cleanIds).Find(&categories).Error; err != nil || len(categories) == 0 {
+		return c.Status(400).JSON(fiber.Map{"error": "Categorías inválidas o inexistentes"})
+	}
+	entry.Categories = categories
+
+	// 5. Guardar en Base de Datos
+	if err := h.DB.Create(&entry).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Error al guardar en la base de datos (posible slug duplicado)"})
+	}
+
+	// 6. --- DISPARAR NOTIFICACIONES POR EMAIL ---
+	// Usamos una goroutine para que el servidor responda rápido mientras se envían los mails en background
+	if h.Notification != nil {
+		go h.Notification.NotifyNewEntry(&entry)
+	}
+
 	return c.Status(201).JSON(entry)
 }
+
+//////////////////////
+//////////////////////
+//////////////////////
 
 func (h *EntryHandler) Delete(c *fiber.Ctx) error {
 	id := c.Params("id")

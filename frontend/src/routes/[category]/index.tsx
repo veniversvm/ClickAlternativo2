@@ -25,9 +25,6 @@ export default function CategoryPage() {
       />
 
       <div class="section-container">
-        <h1 class="section-title">
-          Artículos sobre: <span>{pageTitle()}</span>
-        </h1>
         <Search size="small" />
 
         <Suspense fallback={<p class="page-loader">Cargando...</p>}>

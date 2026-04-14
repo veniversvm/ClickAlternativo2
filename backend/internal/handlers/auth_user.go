@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"os"
 	"time"
 
@@ -15,8 +16,9 @@ import (
 )
 
 type UserAuthHandler struct {
-	DB          *gorm.DB
-	AuthService *services.AuthService
+	DB           *gorm.DB
+	AuthService  *services.AuthService
+	Notification *services.NotificationService
 }
 
 // Helper interno para consistencia de cookies
@@ -42,6 +44,12 @@ func (h *UserAuthHandler) Register(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "Datos inválidos"})
 	}
 
+	if h.Notification == nil {
+		log.Println("🚨 REGISTER ALERTA: UserAuthHandler.Notification es NIL. No se enviarán correos.")
+	} else {
+		log.Println("✅ REGISTER UserAuthHandler.Notification detectado correctamente.")
+	}
+
 	hash, _ := h.AuthService.HashPassword(req.Password)
 	user := models.User{
 		Email:        req.Email,
@@ -56,6 +64,11 @@ func (h *UserAuthHandler) Register(c *fiber.Ctx) error {
 
 	token, _ := h.AuthService.GenerateJWT(user.ID.String(), "user", false)
 	h.setAuthCookie(c, token)
+
+	// --- ENVIAR CORREO DE BIENVENIDA (Asíncrono) ---
+	if h.Notification != nil {
+		go h.Notification.SendWelcomeEmail(user)
+	}
 
 	return c.Status(201).JSON(fiber.Map{"user": user})
 }
@@ -116,6 +129,12 @@ func (h *UserAuthHandler) GoogleCallback(c *fiber.Ctx) error {
 	code := c.Query("code")
 	config := getGoogleConfig()
 
+	if h.Notification == nil {
+		log.Println("🚨 ALERTA: UserAuthHandler.Notification es NIL. No se enviarán correos.")
+	} else {
+		log.Println("✅ UserAuthHandler.Notification detectado correctamente.")
+	}
+
 	// 1. Intercambiar código por token
 	token, err := config.Exchange(context.Background(), code)
 	if err != nil {
@@ -159,6 +178,10 @@ func (h *UserAuthHandler) GoogleCallback(c *fiber.Ctx) error {
 		SameSite: "Lax",
 		Path:     "/", // <--- ESTO ES VITAL: Hace que la cookie sea válida para todo el sitio
 	})
+
+	if h.Notification != nil {
+		go h.Notification.SendWelcomeEmail(user)
+	}
 
 	// 5. Redirigir de vuelta al Frontend
 	return c.Redirect(os.Getenv("FRONTEND_URL"))

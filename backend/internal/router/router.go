@@ -13,6 +13,7 @@ func SetupRoutes(app *fiber.App,
 	categoryHandler *handlers.CategoryHandler,
 	entryHandler *handlers.EntryHandler,
 	mgmtHandler *handlers.AdminMgmtHandler,
+
 ) {
 	// 1. Grupo Base API
 	api := app.Group("/api/v1")
