@@ -3,20 +3,24 @@ import { Title, Meta, Link } from "@solidjs/meta";
 import { For, Show, Suspense, createMemo } from "solid-js";
 import { blogApi } from "~/lib/api";
 import Carousel from "~/components/Carousel/Carousel";
-import { marked } from "marked"; // Importamos el parser
-import "~/styles/blogpost.scss";
+import { marked } from "marked";
 import NotFound from "~/components/Common/NotFound";
+import "~/styles/blogpost.scss";
 
 export default function PostDetailPage() {
   const params = useParams();
+  
+  // 1. Petición asíncrona
   const post = createAsync(() => blogApi.getBySlug(params.slug ?? ""));
 
+  // 2. Memoizamos las imágenes (Safe check para post())
   const postImages = createMemo(() => {
     const data = post();
-    if (!data) return [];
-    return [data.image_url_1, data.image_url_2, data.image_url_3].filter(Boolean) as string[];
+    if (!data || data.error) return [];
+    return [data.image_url1, data.image_url2, data.image_url3].filter(Boolean) as string[];
   });
 
+  // 3. Formateo de URL (Safe check para post())
   const displayUrl = createMemo(() => {
     try {
       const url = post()?.content_url;
@@ -24,6 +28,7 @@ export default function PostDetailPage() {
     } catch { return ""; }
   });
 
+  // 4. Formateo de Fecha
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "Reciente";
     const d = new Date(dateStr);
@@ -32,19 +37,28 @@ export default function PostDetailPage() {
     });
   };
 
-  // --- NUEVA FUNCIÓN: Transforma Markdown a HTML ---
+  // 5. Renderizado de Markdown (Safe check para post())
   const renderedContent = createMemo(() => {
     const content = post()?.content;
     if (!content) return "";
-    return marked.parse(content); // Convierte ### en <h3>, etc.
+    return marked.parse(content);
   });
 
   return (
-    <Suspense fallback={<div class="page-loader">Cargando...</div>}>
+    // Suspense maneja el estado de carga (mientras post() es undefined)
+    <Suspense fallback={<div class="page-loader">Cargando curaduría...</div>}>
       <Show 
-        when={post()} 
-        fallback={<NotFound message="Esta curaduría ya no está disponible en nuestro catálogo." />}>
+        when={post() && !post().error} 
+        fallback={
+          /* 
+             Si post() devuelve null o el objeto tiene un flag de error,
+             lanzamos el componente NotFound que ya tiene HttpStatusCode 404.
+          */
+          <NotFound message={`La curaduría "${params.slug}" no existe o ha sido movida.`} />
+        }
+      >
         <article class="blog-post-container">
+          {/* SEO DINÁMICO */}
           <Title>{post()!.title} | Click Alternativo</Title>
           <Meta name="description" content={post()!.description} />
           <Link rel="canonical" href={`https://clickalternativo.com/${params.category}/${post()!.slug}`} />
@@ -53,7 +67,12 @@ export default function PostDetailPage() {
             <div class="post-visual-side">
               <Carousel images={postImages()} />
               <div class="navigation-wrapper-simple">
-                <a href={post()!.content_url} target="_blank" rel="noopener noreferrer" class="visit-button-full">
+                <a 
+                  href={post()!.content_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="visit-button-full"
+                >
                   VISITAR {displayUrl().toUpperCase()}
                 </a>
               </div>
@@ -65,12 +84,10 @@ export default function PostDetailPage() {
                 <p class="post-date">Curado el {formatDate(post()!.created_at)}</p>
               </header>
 
-              {/* Descripción corta destacada */}
               <div class="post-description-lead">
                 <p>{post()!.description}</p>
               </div>
 
-              {/* CUERPO DEL CONTENIDO (Markdown renderizado) */}
               <Show when={post()!.content}>
                 <div 
                   class="post-main-content" 
@@ -84,7 +101,9 @@ export default function PostDetailPage() {
                   <div class="tags-container-flex">
                     <For each={post()!.categories}>
                       {(cat) => (
-                        <A href={`/${cat.slug}`} class="tag-pill">{cat.name.toUpperCase()}</A>
+                        <A href={`/${cat.slug}`} class="tag-pill">
+                          {cat.name.toUpperCase()}
+                        </A>
                       )}
                     </For>
                   </div>
