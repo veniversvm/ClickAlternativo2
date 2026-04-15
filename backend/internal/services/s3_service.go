@@ -1,9 +1,11 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -17,10 +19,11 @@ import (
 type S3Service struct {
 	client     *s3.Client
 	bucketName string
-	endpoint   string
+	endpoint   string // interno , necesario para comunicacion de api a s3
+	publicURL  string // Externo (NUEVO)
 }
 
-func NewS3Service(region, accessKey, secretKey, bucketName, endpoint string) (*S3Service, error) {
+func NewS3Service(region, accessKey, secretKey, bucketName, endpoint, publicURL string) (*S3Service, error) {
 	// Configuración específica para MinIO
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(region),
@@ -39,6 +42,7 @@ func NewS3Service(region, accessKey, secretKey, bucketName, endpoint string) (*S
 		client:     client,
 		bucketName: bucketName,
 		endpoint:   endpoint,
+		publicURL:  publicURL,
 	}, nil
 }
 
@@ -47,19 +51,25 @@ func (s *S3Service) UploadImage(file io.Reader, fileName string, contentType str
 	ext := filepath.Ext(fileName)
 	key := fmt.Sprintf("entries/%s%s", uuid.New().String(), ext)
 
-	_, err := s.client.PutObject(context.TODO(), &s3.PutObjectInput{
+	// --- SOLUCIÓN: Leer todo a memoria para que sea 'seekable' ---
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return "", fmt.Errorf("error leyendo buffer de imagen: %w", err)
+	}
+
+	_, err = s.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucketName),
 		Key:         aws.String(key),
-		Body:        file,
+		Body:        bytes.NewReader(data), // Ahora el SDK puede leerlo varias veces
 		ContentType: aws.String(contentType),
 	})
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error en PutObject: %w", err)
 	}
 
-	// La URL resultante apuntará a tu servidor MinIO
-	return fmt.Sprintf("%s/%s/%s", s.endpoint, s.bucketName, key), nil
+	log.Printf("✅ Imagen subida con éxito: %s", key)
+	return fmt.Sprintf("%s/%s/%s", s.publicURL, s.bucketName, key), nil
 }
 
 // DeleteImageByUrl extrae la llave de la URL y elimina el objeto de S3

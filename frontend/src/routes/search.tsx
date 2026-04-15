@@ -5,6 +5,7 @@ import { blogApi } from "~/lib/api";
 import Welcome from "~/components/Welcome/Welcome";
 import PostCard from "~/components/PostCard/PostCard";
 import "./index.scss";
+import { Search } from "~/components/SearchBar/SearchBar";
 
 export default function Home() {
   const [searchParams] = useSearchParams();
@@ -85,7 +86,7 @@ export default function Home() {
       <Title>Inicio | Click Alternativo</Title>
       <Meta name="description" content="Contenido web curado por humanos con scroll infinito y búsqueda reactiva." />
 
-      <Welcome />
+      <Search size="small" />
 
       <section class="latest-feed container mx-auto p-4">
         {/* Indicador de búsqueda activa */}

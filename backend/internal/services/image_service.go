@@ -7,6 +7,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/nfnt/resize"
@@ -47,6 +48,8 @@ func ProcessImage(file io.Reader, size int64) (io.Reader, string, error) {
 	} else {
 		err = jpeg.Encode(&output, img, &jpeg.Options{Quality: quality})
 	}
+
+	log.Println("Imagen ok")
 
 	return &output, contentType, err
 }

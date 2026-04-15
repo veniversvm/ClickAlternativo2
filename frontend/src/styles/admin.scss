@@ -1,8 +1,10 @@
-// 1. ÚNICA REGLA @USE AL PRINCIPIO DEL ARCHIVO
+/* ======================================================
+   ADMIN CONFIGURATION & VARIABLES
+   ====================================================== */
 @use "~/styles/variables" as var;
 
 /* ======================================================
-   ESTRUCTURA Y DASHBOARD
+   1. ESTRUCTURA BASE (Layout)
    ====================================================== */
 .admin-layout {
   display: flex;
@@ -22,6 +24,7 @@
   top: 0;
   height: 100vh;
   padding: 2rem 1rem;
+  z-index: 100;
 
   .admin-brand {
     color: var.$primary-color;
@@ -43,11 +46,17 @@
     text-decoration: none;
     padding: 0.8rem 1rem;
     border-radius: 10px;
-    transition: all 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
 
     &:hover, &.active {
       background: rgba(107, 191, 91, 0.1);
       color: var.$primary-color;
+    }
+
+    &.super {
+      border: 1px dashed gold;
+      margin-top: 1rem;
     }
   }
 }
@@ -61,157 +70,252 @@
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  &:hover { background: #ff4757; color: white; }
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ff4757;
+    color: white;
+  }
 }
 
 .admin-main {
   flex: 1;
   padding: 4rem;
-  h1 { font-family: var.$font-family-display; margin-bottom: 3rem; span { color: var.$primary-color; } }
-}
+  overflow-x: hidden;
 
-.admin-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.admin-card {
-  background: #161616;
-  border: 1px solid #222;
-  padding: 2rem;
-  border-radius: 20px;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  transition: all 0.3s;
-  .admin-card-icon { font-size: 2.5rem; }
-  h3 { color: white; margin: 0; }
-  &:hover { border-color: var.$primary-color; transform: translateY(-5px); }
+  h1 { 
+    font-family: var.$font-family-display; 
+    margin-bottom: 2rem; 
+    font-size: 2.5rem;
+    span { color: var.$primary-color; } 
+  }
 }
 
 /* ======================================================
-   TABLAS Y FORMULARIOS
+   2. COMPONENTES COMPARTIDOS (Tablas, Buscadores, Pills)
    ====================================================== */
+.table-container {
+  background: #111;
+  border-radius: 12px;
+  border: 1px solid #222;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  background: #161616;
-  border-radius: 10px;
-  overflow: hidden;
+  
   th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #222; }
-  th { background: #1a1a1a; color: var.$primary-color; font-size: 0.8rem; }
+  
+  th { 
+    background: #1a1a1a; 
+    color: var.$primary-color; 
+    font-size: 0.8rem; 
+    text-transform: uppercase; 
+    font-weight: bold;
+  }
+
+  tr:hover { background: rgba(255,255,255,0.02); }
+
+  .td-img img {
+    width: 60px; height: 40px; object-fit: cover; border-radius: 4px;
+  }
+
+  .td-title-info {
+    display: flex; flex-direction: column; gap: 4px;
+    code { font-size: 0.7rem; color: #666; }
+  }
+
+  .mini-tag {
+    background: #222; color: #888; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.7rem; margin-right: 4px; border: 1px solid #333;
+  }
+
+  .td-empty { text-align: center; padding: 4rem !important; color: #555; font-style: italic; }
+}
+
+.admin-table-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  .search-input-wrapper {
+    position: relative; flex: 1; max-width: 450px;
+    .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); opacity: 0.4; }
+    input {
+      width: 100%; padding: 0.8rem 1rem 0.8rem 2.8rem;
+      background: #161616; border: 1px solid #333; border-radius: 50px; color: white;
+      &:focus { border-color: var.$primary-color; outline: none; }
+    }
+  }
+}
+
+.pill {
+  font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 4px;
+  &.primary { background: var.$primary-color; color: black; }
+  &.secondary { background: #333; color: #aaa; }
 }
 
 /* ======================================================
-   LOGIN PAGE (FIJADO)
+   3. BOTONES Y ACCIONES
    ====================================================== */
-.admin-login-page {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
+.admin-actions {
+  display: flex; gap: 0.5rem;
+  button, .admin-btn-edit {
+    padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+    background: #222; color: white; border: 1px solid #333; text-decoration: none;
+    &.danger { color: #ff4757; &:hover { background: #ff4757; color: white; } }
+    &.save { background: var.$primary-color; color: black; border: none; font-weight: bold; }
+    &:hover { background: #333; }
+  }
 }
 
-.admin-login-form {
-  background: #111;
-  padding: 3rem;
-  border-radius: 15px;
-  border: 1px solid var.$primary-color;
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
+.admin-btn-primary {
+  background: var.$primary-color; color: black; padding: 0.8rem 1.5rem;
+  border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 0.9rem;
+  &:hover { filter: brightness(1.1); transform: translateY(-2px); }
+}
 
-  input {
-    width: 100%;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    background: #222;
-    border: 1px solid #333;
-    color: white;
-    border-radius: 8px;
-    box-sizing: border-box;
+.admin-pagination {
+  display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin: 2rem 0;
+  .pagination-btn {
+    background: #1a1a1a; border: 1px solid #333; color: white; padding: 0.6rem 1.2rem;
+    border-radius: 6px; cursor: pointer; &:disabled { opacity: 0.3; cursor: not-allowed; }
+  }
+  .page-indicator { color: #666; span { color: var.$primary-color; font-weight: bold; } }
+}
+
+/* ======================================================
+   4. VISTAS ESPECÍFICAS (Dashboard, Login, Forms)
+   ====================================================== */
+
+/* --- DASHBOARD CARDS --- */
+.admin-cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;
+}
+
+.admin-card {
+  background: #161616; border: 1px solid #222; padding: 2.5rem; border-radius: 20px;
+  text-decoration: none; display: flex; align-items: center; gap: 1.5rem; transition: all 0.3s ease;
+  .admin-card-icon { font-size: 2.5rem; background: #000; padding: 1rem; border-radius: 12px; }
+  h3 { color: white; margin: 0 0 5px 0; font-size: 1.3rem; }
+  p { color: #666; font-size: 0.85rem; margin: 0; }
+  &:hover { border-color: var.$primary-color; transform: translateY(-5px); background: #1c1c1c; }
+}
+
+/* --- LOGIN PAGE --- */
+.admin-login-page {
+  height: 100vh; display: flex; align-items: center; justify-content: center; background: #000;
+  .admin-login-form {
+    background: #111; padding: 3.5rem; border-radius: 20px; border: 1px solid var.$primary-color;
+    width: 100%; max-width: 420px; text-align: center;
+    h1 { font-family: var.$font-family-display; margin-bottom: 0.5rem; }
+    p.subtitle { color: #666; margin-bottom: 2.5rem; font-size: 0.9rem; }
+    input {
+      width: 100%; padding: 1rem; margin-bottom: 1.2rem; background: #1a1a1a;
+      border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box;
+      &:focus { border-color: var.$primary-color; outline: none; }
+    }
   }
 }
 
 .admin-login-btn {
-  width: 100%;
-  padding: 1rem;
-  background-color: var.$primary-color !important;
-  color: #000 !important;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  &:disabled { opacity: 0.5; background-color: #444 !important; }
+  width: 100%; padding: 1rem; background-color: var.$primary-color !important;
+  color: #000 !important; border: none; border-radius: 10px; font-weight: 800;
+  cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+  &:disabled { opacity: 0.5; background-color: #444 !important; cursor: not-allowed; }
 }
 
+/* --- ENTRY FORM (Creación de Blogs) --- */
 .admin-entry-form {
-  background: #111;
-  padding: 2rem;
-  border-radius: 15px;
-  border: 1px solid #222;
-
+  background: #111; padding: 2.5rem; border-radius: 20px; border: 1px solid #222;
   .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    @media (max-width: 900px) { grid-template-columns: 1fr; }
+    display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem;
+    @media (max-width: 992px) { grid-template-columns: 1fr; }
   }
-
-  label {
-    display: block;
-    color: var.$primary-color;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    margin-top: 1.5rem;
-    font-size: 0.9rem;
-  }
-
+  label { display: block; color: var.$primary-color; font-weight: bold; margin: 1.5rem 0 0.5rem; font-size: 0.85rem; }
   input[type="text"], input[type="url"], textarea {
-    width: 100%;
-    padding: 0.8rem;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: white;
-    border-radius: 8px;
+    width: 100%; padding: 0.9rem; background: #1a1a1a; border: 1px solid #333;
+    color: white; border-radius: 10px; font-family: inherit;
     &:focus { border-color: var.$primary-color; outline: none; }
   }
-
-  .content-editor { height: 300px; font-family: monospace; }
-
+  .content-editor { height: 400px; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; }
+  
   .categories-selector {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    background: #1a1a1a;
-    padding: 1rem;
-    border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    
-    .cat-checkbox {
-      margin: 0;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: #ccc;
+    background: #000; padding: 1.2rem; border-radius: 12px; border: 1px solid #222;
+    max-height: 250px; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;
+    .cat-checkbox { margin: 0; font-size: 0.8rem; color: #888; display: flex; align-items: center; gap: 8px; }
+  }
+}
+
+.admin-error-msg { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; text-align: center; }
+
+/* --- TAG MANAGEMENT (Inline Edit) --- */
+.tag-create-form .form-row {
+  display: flex; gap: 1rem;
+  @media (max-width: 600px) { flex-direction: column; }
+}
+
+.editing-row {
+  background: rgba(107, 191, 91, 0.05) !important;
+  input, select { background: #000; border: 1px solid var.$primary-color; color: white; padding: 5px; border-radius: 4px; }
+}
+
+/* REFUERZO DE PAGINACIÓN */
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+
+  .pagination-btn {
+    background: #222 !important;
+    border: 1px solid #444 !important;
+    color: white !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 8px !important;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: var.$primary-color !important;
+      background: #333 !important;
+    }
+
+    &:disabled {
+      opacity: 0.2;
+      cursor: not-allowed;
     }
   }
 
-  .submit-btn {
-    margin-top: 2rem;
+  .page-indicator {
+    color: #888;
+    font-size: 0.9rem;
+    span { color: var.$primary-color; font-weight: bold; }
+  }
+}
+
+/* REFUERZO DE BUSCADOR */
+.search-input-wrapper {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0.2rem 1rem;
+  
+  input {
+    background: transparent !important;
+    border: none !important;
+    color: white;
+    padding: 0.7rem;
     width: 100%;
-    padding: 1rem;
-    background: var.$primary-color;
-    color: black;
-    font-weight: 900;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    &:disabled { opacity: 0.5; }
+    outline: none;
   }
 }

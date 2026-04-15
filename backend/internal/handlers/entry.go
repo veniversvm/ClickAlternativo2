@@ -23,6 +23,7 @@ func (h *EntryHandler) Create(c *fiber.Ctx) error {
 	// 1. Parsear el formulario multipart
 	form, err := c.MultipartForm()
 	if err != nil {
+		log.Println("Error en el formulario")
 		return c.Status(400).JSON(fiber.Map{"error": "Error en el formulario"})
 	}
 
@@ -35,6 +36,7 @@ func (h *EntryHandler) Create(c *fiber.Ctx) error {
 
 	// --- REGLA DE NEGOCIO: VALIDACIÓN DE CAMPOS OBLIGATORIOS ---
 	if title == "" || description == "" || contentBody == "" || categoryIDsRaw == "" {
+		log.Println("Título, descripción, contenido y al menos una categoría son obligatorios")
 		return c.Status(400).JSON(fiber.Map{"error": "Título, descripción, contenido y al menos una categoría son obligatorios"})
 	}
 
@@ -60,21 +62,25 @@ func (h *EntryHandler) Create(c *fiber.Ctx) error {
 			cleanReader, contentType, err := services.ProcessImage(file, fileHeader.Size)
 			if err != nil {
 				file.Close()
+				log.Println("Imagen " + fieldName + " inválida o corrupta")
 				return c.Status(400).JSON(fiber.Map{"error": "Imagen " + fieldName + " inválida o corrupta"})
 			}
 
 			url, err := h.S3.UploadImage(cleanReader, fileHeader.Filename, contentType)
-			if err == nil {
-				imageCount++
-				if i == 1 {
-					entry.ImageURL1 = url
-				}
-				if i == 2 {
-					entry.ImageURL2 = url
-				}
-				if i == 3 {
-					entry.ImageURL3 = url
-				}
+			if err != nil {
+				// ESTO ES VITAL: Ver el error real en los logs de Docker
+				log.Printf("❌ Fallo subida a S3 (slot %d): %v", i, err)
+				continue
+			}
+			imageCount++
+			if i == 1 {
+				entry.ImageURL1 = url
+			}
+			if i == 2 {
+				entry.ImageURL2 = url
+			}
+			if i == 3 {
+				entry.ImageURL3 = url
 			}
 			file.Close()
 		}
@@ -82,6 +88,7 @@ func (h *EntryHandler) Create(c *fiber.Ctx) error {
 
 	// --- REGLA DE NEGOCIO: AL MENOS UNA IMAGEN ---
 	if imageCount == 0 {
+		log.Println("Debes subir al menos una imagen (image1)")
 		return c.Status(400).JSON(fiber.Map{"error": "Debes subir al menos una imagen (image1)"})
 	}
 
@@ -94,12 +101,14 @@ func (h *EntryHandler) Create(c *fiber.Ctx) error {
 	}
 
 	if err := h.DB.Where("id IN ?", cleanIds).Find(&categories).Error; err != nil || len(categories) == 0 {
+		log.Println("Categorías inválidas o inexistentes")
 		return c.Status(400).JSON(fiber.Map{"error": "Categorías inválidas o inexistentes"})
 	}
 	entry.Categories = categories
 
 	// 5. Guardar en Base de Datos
 	if err := h.DB.Create(&entry).Error; err != nil {
+		log.Println("Error al guardar en la base de datos (posible slug duplicado)")
 		return c.Status(500).JSON(fiber.Map{"error": "Error al guardar en la base de datos (posible slug duplicado)"})
 	}
 
@@ -149,59 +158,45 @@ func (h *EntryHandler) GetPaginated(c *fiber.Ctx) error {
 	limit := 20
 	offset := (page - 1) * limit
 
-	// 1. Iniciamos la consulta con DISTINCT para evitar filas duplicadas al hacer Joins
-	// Seleccionamos solo los campos necesarios para el feed (Lean Response)
-	query := h.DB.Model(&models.Entry{}).
-		Select("DISTINCT entries.id, entries.title, entries.slug, entries.description, entries.image_url1, entries.created_at")
+	// 1. Construimos la base de la consulta (SIN PAGINACIÓN)
+	query := h.DB.Model(&models.Entry{})
 
-	// 2. Lógica de Búsqueda Expandida (Título, Descripción o Tag)
 	if search != "" {
 		searchPattern := "%" + strings.ToLower(search) + "%"
-
-		// Usamos Joins para incluir los nombres de las categorías en la búsqueda
 		query = query.Joins("LEFT JOIN entry_categories ec ON ec.entry_id = entries.id").
 			Joins("LEFT JOIN categories c ON c.id = ec.category_id").
 			Where("(LOWER(entries.title) LIKE ? OR LOWER(entries.description) LIKE ? OR LOWER(c.name) LIKE ?)",
 				searchPattern, searchPattern, searchPattern)
 	}
 
-	// 3. Filtro estricto por Tag (Si se navega por una sección específica)
 	if tagSlug != "" {
-		// Reutilizamos el join si no se ha hecho en el search
-		if search == "" {
-			query = query.Joins("JOIN entry_categories ec_filter ON ec_filter.entry_id = entries.id").
-				Joins("JOIN categories c_filter ON c_filter.id = ec_filter.category_id").
-				Where("c_filter.slug = ?", tagSlug)
-		} else {
-			// Si ya hay búsqueda, simplemente añadimos la condición de slug al join existente
-			query = query.Where("c.slug = ?", tagSlug)
-		}
+		query = query.Joins("JOIN entry_categories ec_f ON ec_f.entry_id = entries.id").
+			Joins("JOIN categories c_f ON c_f.id = ec_f.category_id").
+			Where("c_f.slug = ?", tagSlug)
 	}
 
-	// 4. Ejecución con Orden y Paginación
+	// 2. OBTENER EL TOTAL REAL (Independiente de la página actual)
+	var total int64
+	// Importante: Usamos una sesión limpia para el Count para no arrastrar Selects previos
+	query.Session(&gorm.Session{}).Distinct("entries.id").Count(&total)
+
+	// 3. OBTENER LOS RESULTADOS PAGINADOS
 	var entries []models.Entry
-	err := query.
-		Preload("Categories", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id", "name", "slug", "type")
-		}).
-		Order("entries.created_at DESC"). // Siempre lo más nuevo primero
+	err := query.Distinct("entries.id").
+		Select("entries.id", "entries.title", "entries.slug", "entries.description", "entries.image_url1", "entries.created_at").
+		Preload("Categories").
+		Order("entries.created_at DESC").
 		Limit(limit).
 		Offset(offset).
 		Find(&entries).Error
 
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Error al consultar la base de datos"})
+		return c.Status(500).JSON(fiber.Map{"error": "Error de base de datos"})
 	}
-
-	if search != "" {
-		log.Printf("Busqueda: %s", search)
-	}
-	log.Printf("Numero de entradas: ")
-	log.Println(len(entries))
 
 	return c.JSON(fiber.Map{
 		"page":    page,
-		"limit":   limit,
+		"total":   total, // Ahora siempre devolverá el total real (ej: 82)
 		"results": entries,
 	})
 }

@@ -63,12 +63,12 @@ export default function SubscribeForm() {
         Registrarse con Google
       </button>
 
-      <div class="divider">
+      {/* <div class="divider">
         <span>o usa tu correo</span>
-      </div>
+      </div> */}
 
       {/* Formulario Manual */}
-      <form onSubmit={handleManualRegister} class="manual-form">
+      {/* <form onSubmit={handleManualRegister} class="manual-form">
         <div class="input-group">
           <IoPersonOutline class="input-icon" />
           <input 
@@ -114,7 +114,7 @@ export default function SubscribeForm() {
         <button type="submit" class="submit-btn" disabled={loading()}>
           {loading() ? "Procesando..." : "Crear mi cuenta"}
         </button>
-      </form>
+      </form> */}
     </div>
   );
 }

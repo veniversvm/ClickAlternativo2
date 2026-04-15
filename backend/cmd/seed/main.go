@@ -135,9 +135,10 @@ func extractBody(content string) string {
 //  S3
 
 type S3Client struct {
-	client   *s3.Client
-	bucket   string
-	endpoint string
+	client    *s3.Client
+	bucket    string
+	endpoint  string
+	publicURL string
 }
 
 func newS3Client() (*S3Client, error) {
@@ -146,6 +147,7 @@ func newS3Client() (*S3Client, error) {
 	secretKey := mustEnv("AWS_SECRET_ACCESS_KEY")
 	bucket := mustEnv("AWS_BUCKET_NAME")
 	endpoint := getEnv("S3_ENDPOINT", "http://localhost:9000")
+	publicURL := getEnv("S3_PUBLIC_URL", endpoint)
 
 	cfg, err := awsconfig.LoadDefaultConfig(context.TODO(),
 		awsconfig.WithRegion(region),
@@ -162,7 +164,7 @@ func newS3Client() (*S3Client, error) {
 		o.UsePathStyle = true
 	})
 
-	return &S3Client{client: client, bucket: bucket, endpoint: endpoint}, nil
+	return &S3Client{client: client, bucket: bucket, endpoint: endpoint, publicURL: publicURL}, nil
 }
 
 func (s *S3Client) upload(filePath string) (string, error) {
@@ -230,7 +232,7 @@ func (s *S3Client) uploadRaw(r io.Reader, originalName string, contentType strin
 		return "", err
 	}
 
-	return fmt.Sprintf("%s/%s/%s", s.endpoint, s.bucket, key), nil
+	return fmt.Sprintf("%s/%s/%s", s.publicURL, s.bucket, key), nil
 }
 
 //  Tags primarios del menú
@@ -286,21 +288,23 @@ func main() {
 		log.Println("✅ Conectado a DB y S3")
 
 		//  Crear SuperAdmin por defecto
+		sudoEmail := getEnv("ADMIN_EMAIL", "admin@admin.com")
+		sudoPass := getEnv("ADMIN_PASSWORD", "password")
 		var existingAdmin models.Admin
-		if db.Where("email = ?", "admin@clickalternativo.com").First(&existingAdmin).Error != nil {
-			hash, err := hashPassword("admin1234")
+		if db.Where("email = ?", sudoEmail).First(&existingAdmin).Error != nil {
+			hash, err := hashPassword(sudoPass)
 			if err != nil {
 				log.Printf("❌ Error hasheando password del admin: %v", err)
 			} else {
 				superAdmin := models.Admin{
-					Email:        "admin@clickalternativo.com",
+					Email:        sudoEmail,
 					PasswordHash: hash,
 					IsSuperAdmin: true,
 				}
 				if err := db.Create(&superAdmin).Error; err != nil {
 					log.Printf("❌ Error creando superadmin: %v", err)
 				} else {
-					log.Println("👑 SuperAdmin creado: admin@clickalternativo.com / admin1234")
+					log.Println("👑 SuperAdmin creado: " + sudoEmail)
 				}
 			}
 		} else {

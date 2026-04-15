@@ -56,7 +56,7 @@ export default function LoginForm() {
         Entrar con Google
       </button>
 
-      <div class="divider">
+      {/* <div class="divider">
         <span>o usa tu cuenta</span>
       </div>
 
@@ -94,7 +94,7 @@ export default function LoginForm() {
         <button type="submit" class="submit-btn" disabled={loading()}>
           {loading() ? "Verificando..." : "Entrar ahora"}
         </button>
-      </form>
+      </form> */}
     </div>
   );
 }

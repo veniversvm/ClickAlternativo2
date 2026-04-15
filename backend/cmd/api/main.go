@@ -34,6 +34,7 @@ func main() {
 		os.Getenv("AWS_SECRET_ACCESS_KEY"),
 		os.Getenv("AWS_BUCKET_NAME"),
 		os.Getenv("S3_ENDPOINT"),
+		os.Getenv("S3_PUBLIC_URL"),
 	)
 	if err != nil {
 		log.Fatalf("❌ Error inicializando S3/MinIO: %v", err)

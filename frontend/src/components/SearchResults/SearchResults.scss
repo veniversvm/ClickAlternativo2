@@ -23,9 +23,10 @@
 
 @media (min-width: 768px) {
   .posts-grid {
-    display: grid;
-    // Esto crea columnas automáticas que se ajustan al ancho de la pantalla
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem; // Más espacio entre tarjetas
+  padding: 2rem 0;
+  width: 100%;
+}
 }

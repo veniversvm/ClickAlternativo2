@@ -21,7 +21,9 @@ async function request(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   
   const headers = new Headers(options.headers || {});
-  headers.set("Content-Type", "application/json");
+  if (!(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
 
   // --- MAGIA DEL SSR: PASAR COOKIES DEL NAVEGADOR A GO ---
   if (isServer) {

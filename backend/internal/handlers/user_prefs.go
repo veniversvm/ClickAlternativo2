@@ -84,5 +84,14 @@ func (h *UserHandler) GetProfile(c *fiber.Ctx) error {
 	}
 
 	// Añadimos el campo role explícitamente si no está en el struct
-	return c.JSON(user)
+	return c.JSON(fiber.Map{
+		"id":             user.ID,
+		"email":          user.Email,
+		"username":       user.Username,
+		"avatar_url":     user.AvatarURL,
+		"notify_email":   user.NotifyEmail,
+		"notify_push":    user.NotifyPush,
+		"preferred_tags": user.PreferredTags,
+		"role":           "user", // <--- ESTO ES LO QUE EL FRONTEND BUSCA
+	})
 }

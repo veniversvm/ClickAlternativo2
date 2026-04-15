@@ -125,15 +125,10 @@ func (h *UserAuthHandler) GoogleLogin(c *fiber.Ctx) error {
 }
 
 // GoogleCallback - Procesa la respuesta de Google
+// GoogleCallback - Procesa la respuesta de Google
 func (h *UserAuthHandler) GoogleCallback(c *fiber.Ctx) error {
 	code := c.Query("code")
 	config := getGoogleConfig()
-
-	if h.Notification == nil {
-		log.Println("🚨 ALERTA: UserAuthHandler.Notification es NIL. No se enviarán correos.")
-	} else {
-		log.Println("✅ UserAuthHandler.Notification detectado correctamente.")
-	}
 
 	// 1. Intercambiar código por token
 	token, err := config.Exchange(context.Background(), code)
@@ -156,15 +151,31 @@ func (h *UserAuthHandler) GoogleCallback(c *fiber.Ctx) error {
 	}
 	json.NewDecoder(resp.Body).Decode(&googleUser)
 
-	// 3. Upsert en DB (Si existe, lo trae; si no, lo crea)
+	// 3. LÓGICA DE SUSCRIPCIÓN ÚNICA
 	var user models.User
-	h.DB.Where("email = ?", googleUser.Email).FirstOrCreate(&user, models.User{
-		Email:        googleUser.Email,
-		AuthProvider: "google",
-		ExternalID:   googleUser.ID,
-		AvatarURL:    googleUser.Picture,
-		Username:     googleUser.Email, // Username temporal
-	})
+	isNewUser := false
+
+	// Buscamos si el usuario ya existe
+	result := h.DB.Where("email = ?", googleUser.Email).First(&user)
+
+	if result.Error != nil {
+		// Si no existe (GORM retorna error RecordNotFound), lo creamos
+		isNewUser = true
+		user = models.User{
+			Email:        googleUser.Email,
+			AuthProvider: "google",
+			ExternalID:   googleUser.ID,
+			AvatarURL:    googleUser.Picture,
+			Username:     googleUser.Email, // Username temporal
+		}
+		if err := h.DB.Create(&user).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "No se pudo crear el usuario"})
+		}
+	} else {
+		// Si ya existe, opcionalmente actualizamos el avatar por si cambió en Google
+		user.AvatarURL = googleUser.Picture
+		h.DB.Save(&user)
+	}
 
 	// 4. Generar nuestro JWT y poner la Cookie
 	jwtToken, _ := h.AuthService.GenerateJWT(user.ID.String(), "user", false)
@@ -174,12 +185,13 @@ func (h *UserAuthHandler) GoogleCallback(c *fiber.Ctx) error {
 		Value:    jwtToken,
 		Expires:  time.Now().Add(72 * time.Hour),
 		HTTPOnly: true,
-		Secure:   false, // true en producción
+		Secure:   false,
 		SameSite: "Lax",
-		Path:     "/", // <--- ESTO ES VITAL: Hace que la cookie sea válida para todo el sitio
+		Path:     "/",
 	})
 
-	if h.Notification != nil {
+	// --- ENVIAR CORREO SOLO SI ES NUEVO ---
+	if isNewUser && h.Notification != nil {
 		go h.Notification.SendWelcomeEmail(user)
 	}
 
