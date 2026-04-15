@@ -3,6 +3,8 @@ import { A } from "@solidjs/router";
 import AdminGuard from "~/components/Admin/AdminGuard";
 import { useAdminAuth } from "~/context/AdminAuthContext";
 
+export const config = { ssr: false };
+
 export default function AdminDashboard() {
   const admin = useAdminAuth();
 

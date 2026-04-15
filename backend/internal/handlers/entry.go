@@ -19,6 +19,10 @@ type EntryHandler struct {
 	Notification *services.NotificationService
 }
 
+/////////////
+/////////////
+/////////////
+
 func (h *EntryHandler) Create(c *fiber.Ctx) error {
 	// 1. Parsear el formulario multipart
 	form, err := c.MultipartForm()
@@ -306,6 +310,23 @@ func (h *EntryHandler) Update(c *fiber.Ctx) error {
 	// 5. Guardar cambios en DB
 	if err := h.DB.Save(&entry).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Error al actualizar la entrada"})
+	}
+
+	return c.JSON(entry)
+}
+
+/////////////
+/////////////
+/////////////
+
+// GetByID - Solo para uso administrativo
+func (h *EntryHandler) GetByID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var entry models.Entry
+
+	if err := h.DB.Preload("Categories").First(&entry, "id = ?", id).Error; err != nil {
+		log.Println("Entrada no encontrada")
+		return c.Status(404).JSON(fiber.Map{"error": "Entrada no encontrada"})
 	}
 
 	return c.JSON(entry)

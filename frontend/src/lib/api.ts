@@ -20,46 +20,64 @@ export const API_BASE_URL = isServer ? SERVER_API : PUBLIC_API;
 async function request(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   
+  // 1. CONFIGURACIÓN DE ABORT (8 segundos de timeout)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
   const headers = new Headers(options.headers || {});
+  
+  // 2. GESTIÓN DE CONTENT-TYPE
+  // Si no es FormData, enviamos JSON. Si es FormData, dejamos que el navegador ponga el boundary.
   if (!(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
 
-  // --- MAGIA DEL SSR: PASAR COOKIES DEL NAVEGADOR A GO ---
+  // 3. MAGIA DEL SSR: REENVÍO DE TODAS LAS COOKIES
   if (isServer) {
-  const event = getRequestEvent();
-  const cookies = event?.request.headers.get("cookie");
-  if (cookies) {
-    // Pasamos todas las cookies (incluyendo jwt y admin_jwt)
-    headers.set("cookie", cookies); 
+    const event = getRequestEvent();
+    const cookies = event?.request.headers.get("cookie");
+    if (cookies) {
+      headers.set("cookie", cookies);
+    }
   }
-}
 
   try {
     const response = await fetch(url, {
       ...options,
       headers,
-      // 'include' permite que el navegador envíe y reciba cookies HttpOnly
-      credentials: "include", 
+      signal: controller.signal,
+      credentials: "include", // Permite enviar y recibir admin_jwt y jwt
     });
 
-    // 204 No Content (útil para Logout o Delete)
+    clearTimeout(timeoutId);
+
+    // No Content (Logout, Delete)
     if (response.status === 204) return { success: true };
 
-    // Si la sesión expiró o no es válida, devolvemos null para que AuthContext lo sepa
+    // Manejo de Sesión No Válida
     if (response.status === 401 || response.status === 403) {
       return null;
     }
 
     const data = await response.json();
+
     if (!response.ok) {
-      return { error: true, message: data.error || "Error desconocido", status: response.status };
+      return { 
+        error: true, 
+        message: data.error || "Error en el servidor", 
+        status: response.status 
+      };
     }
 
     return data;
-  } catch (e) {
-    console.error(`[API Connection Failed] No se pudo conectar a ${url}`);
-    return null; // Failsafe: evita que la app explote
+  } catch (e: any) {
+    clearTimeout(timeoutId);
+    if (e.name === "AbortError") {
+        console.error(`[API Timeout] ${url} excedió el tiempo límite`);
+    } else {
+        console.error(`[API Connection Failed] ${url}`);
+    }
+    return null; // Failsafe para que la UI no explote
   }
 }
 
@@ -111,52 +129,23 @@ export const userApi = {
 // src/lib/api.ts - Añadir al final
 
 export const adminApi = {
-  // --- GESTIÓN DE ENTTRADAS ---
-  createEntry: (formData: FormData) => request("/admin/entries", {
-    method: "POST",
-    body: formData, // Enviamos FormData directamente para las imágenes
-    headers: {}, // El navegador pondrá el boundary
-  }),
-
-  updateEntry: (id: string, formData: FormData) => request(`/admin/entries/${id}`, {
-    method: "PUT",
-    body: formData,
-    headers: {},
-  }),
-
-  deleteEntry: (id: string) => request(`/admin/entries/${id}`, {
-    method: "DELETE"
-  }),
-
-  // --- GESTIÓN DE CATEGORÍAS ---
-  createCategory: (data: { name: string, type?: string }) => request("/admin/categories", {
-    method: "POST",
-    body: JSON.stringify(data)
-  }),
-
-  updateCategory: (id: number, data: { name: string }) => request(`/admin/categories/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data)
-  }),
-
-  deleteCategory: (id: number) => request(`/admin/categories/${id}`, {
-    method: "DELETE"
-  }),
-
-  // --- GESTIÓN DE STAFF (SUPER-ADMIN) ---
-  listAdmins: () => request("/admin/management/users"),
-  
-  createAdmin: (data: any) => request("/admin/management/users", {
-    method: "POST",
-    body: JSON.stringify(data)
-  }),
-
-  loginAdmin: (credentials: any) => request("/auth/admin/login", { 
-    method: "POST", 
-    body: JSON.stringify(credentials) 
-  }),
-
+  // GESTIÓN DE STAFF
+  getMe: () => request("/admin/me"),
+  loginAdmin: (creds: any) => request("/auth/admin/login", { method: "POST", body: JSON.stringify(creds) }),
   logout: () => request("/auth/admin/logout", { method: "POST" }),
+  
+  // GESTIÓN DE ENTRADAS
+  createEntry: (fd: FormData) => request("/admin/entries", { method: "POST", body: fd }),
+  getEntryById: (id: string) => request(`/admin/entries/${id}`),
+  updateEntry: (id: string, fd: FormData) => request(`/admin/entries/${id}`, { method: "PUT", body: fd }),
+  deleteEntry: (id: string) => request(`/admin/entries/${id}`, { method: "DELETE" }),
 
-   getMe: () => request("/admin/me")
+  // GESTIÓN DE CATEGORÍAS
+  createCategory: (data: any) => request("/admin/categories", { method: "POST", body: JSON.stringify(data) }),
+  updateCategory: (id: number, data: any) => request(`/admin/categories/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteCategory: (id: number) => request(`/admin/categories/${id}`, { method: "DELETE" }),
+
+  // SUPER-ADMIN
+  listAdmins: () => request("/admin/management/users"),
+  createAdmin: (data: any) => request("/admin/management/users", { method: "POST", body: JSON.stringify(data) })
 };

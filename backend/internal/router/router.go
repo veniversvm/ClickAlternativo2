@@ -61,6 +61,7 @@ func SetupRoutes(app *fiber.App,
 	admin.Post("/entries", entryHandler.Create)
 	admin.Put("/entries/:id", entryHandler.Update)
 	admin.Delete("/entries/:id", entryHandler.Delete)
+	admin.Get("/entries/:id", entryHandler.GetByID) // GET /api/v1/admin/entries/:uuid
 
 	// --- RUTAS PROTEGIDAS (SUPER-ADMIN) ---
 	// Gestión de otros administradores

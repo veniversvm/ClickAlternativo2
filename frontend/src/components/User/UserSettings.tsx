@@ -1,20 +1,33 @@
-import { createSignal, createResource, For, Show, createEffect } from "solid-js";
+import {
+  createSignal,
+  createResource,
+  For,
+  Show,
+  createEffect,
+  createMemo,
+} from "solid-js";
 import { useAuth } from "~/context/AuthContext";
 import { blogApi, userApi } from "~/lib/api";
 import "./UserSettings.scss";
 
 export default function UserSettings() {
   const auth = useAuth();
-
   const [allCategories] = createResource(() => blogApi.getCategories());
 
   const [notifyEmail, setNotifyEmail] = createSignal(false);
   const [notifyPush, setNotifyPush] = createSignal(false);
   const [selectedTags, setSelectedTags] = createSignal<number[]>([]);
-  const [isSaving, setIsSaving] = createSignal(false);
-  const [message, setMessage] = createSignal<{ type: "success" | "error"; text: string } | null>(null);
 
-  // createEffect en lugar de onMount — espera a que el resource resuelva
+  // --- NUEVO: Estado para el buscador de etiquetas ---
+  const [tagSearch, setTagSearch] = createSignal("");
+
+  // Cambiamos isSaving por isSubmitting para que coincida con el resto del código
+  const [isSubmitting, setIsSubmitting] = createSignal(false);
+  const [message, setMessage] = createSignal<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
   createEffect(() => {
     const user = auth.user();
     if (user) {
@@ -24,14 +37,22 @@ export default function UserSettings() {
     }
   });
 
+  // --- LÓGICA DE FILTRADO ---
+  const filteredTags = createMemo(() => {
+    const list = allCategories() || [];
+    const query = tagSearch().toLowerCase().trim();
+    if (!query) return list;
+    return list.filter((cat: any) => cat.name.toLowerCase().includes(query));
+  });
+
   const toggleTag = (id: number) => {
-    setSelectedTags(prev =>
-      prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]
+    setSelectedTags((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
     );
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
+    setIsSubmitting(true); // Cambiado aquí
     setMessage(null);
 
     const result = await userApi.updateProfile({
@@ -47,7 +68,7 @@ export default function UserSettings() {
       setMessage({ type: "error", text: "Error al guardar cambios." });
     }
 
-    setIsSaving(false);
+    setIsSubmitting(false); // Cambiado aquí
     setTimeout(() => setMessage(null), 3000);
   };
 
@@ -63,7 +84,11 @@ export default function UserSettings() {
               </span>
             }
           >
-            <img src={auth.user()!.avatar_url} alt="Avatar" class="settings-avatar" />
+            <img
+              src={auth.user()!.avatar_url}
+              alt="Avatar"
+              class="settings-avatar"
+            />
           </Show>
         </div>
         <div class="settings-user-info">
@@ -85,27 +110,43 @@ export default function UserSettings() {
             <span class="toggle-thumb" />
           </span>
         </label>
-        <label class="setting-toggle">
-          <span>Notificaciones Push</span>
-          <input
-            type="checkbox"
-            checked={notifyPush()}
-            onChange={(e) => setNotifyPush(e.currentTarget.checked)}
-          />
-          <span class="toggle-track">
-            <span class="toggle-thumb" />
-          </span>
-        </label>
       </section>
 
       <section class="settings-section">
         <h3>Mis Intereses</h3>
         <p class="section-hint">
-          Selecciona las categorías de las que querés recibir novedades:
+          Seleccioná las categorías de las que querés recibir novedades:
         </p>
-        <Show when={!allCategories.loading} fallback={<p class="section-hint">Cargando categorías...</p>}>
+
+        {/* --- NUEVO: Input del Buscador --- */}
+        <div class="tag-filter-container">
+          <input
+            type="text"
+            placeholder="Filtrar etiquetas..."
+            value={tagSearch()}
+            onInput={(e) => setTagSearch(e.currentTarget.value)}
+            class="tag-filter-input"
+          />
+          <Show when={tagSearch()}>
+            <button class="clear-search" onClick={() => setTagSearch("")}>
+              ×
+            </button>
+          </Show>
+        </div>
+
+        <Show
+          when={!allCategories.loading}
+          fallback={<p class="section-hint">Cargando categorías...</p>}
+        >
           <div class="tags-grid">
-            <For each={allCategories()}>
+            <For
+              each={filteredTags()}
+              fallback={
+                <p class="no-results-msg">
+                  No encontramos etiquetas que coincidan con "{tagSearch()}"
+                </p>
+              }
+            >
               {(cat: any) => (
                 <button
                   class="tag-pill-btn"
@@ -125,8 +166,13 @@ export default function UserSettings() {
         <Show when={message()}>
           <p class={`status-msg ${message()?.type}`}>{message()?.text}</p>
         </Show>
-        <button class="save-btn" disabled={isSaving()} onClick={handleSave} type="button">
-          {isSaving() ? "Guardando..." : "Guardar Cambios"}
+        <button
+          class="save-btn"
+          disabled={isSubmitting()}
+          onClick={handleSave}
+          type="button"
+        >
+          {isSubmitting() ? "Guardando..." : "Guardar Cambios"}
         </button>
       </footer>
     </div>
