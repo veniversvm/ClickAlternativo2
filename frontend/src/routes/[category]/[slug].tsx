@@ -10,17 +10,18 @@ import "~/styles/blogpost.scss";
 export default function PostDetailPage() {
   const params = useParams();
   
-  // 1. Petición asíncrona
+  // 1. Cargamos el post (SSR)
   const post = createAsync(() => blogApi.getBySlug(params.slug ?? ""));
 
-  // 2. Memoizamos las imágenes (Safe check para post())
+  // 2. CORRECCIÓN: Mapeo de imágenes con nombres exactos (image_url_1)
   const postImages = createMemo(() => {
-    const data = post();
-    if (!data || data.error) return [];
-    return [data.image_url1, data.image_url2, data.image_url3].filter(Boolean) as string[];
+    const d = post();
+    if (!d || d.error) return [];
+    // Usamos los nombres con guion bajo que vienen de tu JSON de Go
+    return [d.image_url_1, d.image_url_2, d.image_url_3].filter(Boolean) as string[];
   });
 
-  // 3. Formateo de URL (Safe check para post())
+  // 3. Limpieza de URL para el botón
   const displayUrl = createMemo(() => {
     try {
       const url = post()?.content_url;
@@ -28,7 +29,6 @@ export default function PostDetailPage() {
     } catch { return ""; }
   });
 
-  // 4. Formateo de Fecha
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "Reciente";
     const d = new Date(dateStr);
@@ -37,7 +37,6 @@ export default function PostDetailPage() {
     });
   };
 
-  // 5. Renderizado de Markdown (Safe check para post())
   const renderedContent = createMemo(() => {
     const content = post()?.content;
     if (!content) return "";
@@ -45,27 +44,25 @@ export default function PostDetailPage() {
   });
 
   return (
-    // Suspense maneja el estado de carga (mientras post() es undefined)
-    <Suspense fallback={<div class="page-loader">Cargando curaduría...</div>}>
+    <Suspense fallback={<div class="page-loader">Cargando...</div>}>
       <Show 
         when={post() && !post().error} 
         fallback={
-          /* 
-             Si post() devuelve null o el objeto tiene un flag de error,
-             lanzamos el componente NotFound que ya tiene HttpStatusCode 404.
-          */
-          <NotFound message={`La curaduría "${params.slug}" no existe o ha sido movida.`} />
+          <NotFound message={`La curaduría "${params.slug}" no se encuentra en nuestros registros.`} />
         }
       >
         <article class="blog-post-container">
-          {/* SEO DINÁMICO */}
           <Title>{post()!.title} | Click Alternativo</Title>
           <Meta name="description" content={post()!.description} />
+          {/* SEO Meta para la imagen principal */}
+          <Meta property="og:image" content={post()!.image_url_1} />
           <Link rel="canonical" href={`https://clickalternativo.com/${params.category}/${post()!.slug}`} />
 
           <div class="post-detail-layout">
             <div class="post-visual-side">
+              {/* Carrusel con las imágenes corregidas */}
               <Carousel images={postImages()} />
+              
               <div class="navigation-wrapper-simple">
                 <a 
                   href={post()!.content_url} 
