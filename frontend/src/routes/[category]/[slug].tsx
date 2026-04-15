@@ -5,6 +5,7 @@ import { blogApi } from "~/lib/api";
 import Carousel from "~/components/Carousel/Carousel";
 import { marked } from "marked"; // Importamos el parser
 import "~/styles/blogpost.scss";
+import NotFound from "~/components/Common/NotFound";
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -39,8 +40,10 @@ export default function PostDetailPage() {
   });
 
   return (
-    <Suspense fallback={<div class="page-loader">Preparando curaduría...</div>}>
-      <Show when={post()} fallback={<div class="content-not-found"><h1>404</h1><A href="/">Volver</A></div>}>
+    <Suspense fallback={<div class="page-loader">Cargando...</div>}>
+      <Show 
+        when={post()} 
+        fallback={<NotFound message="Esta curaduría ya no está disponible en nuestro catálogo." />}>
         <article class="blog-post-container">
           <Title>{post()!.title} | Click Alternativo</Title>
           <Meta name="description" content={post()!.description} />

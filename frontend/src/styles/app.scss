@@ -1,18 +1,27 @@
 // frontend/src/styles/app.scss
-@use "~/styles/variables" as var;
-@use "~/styles/global";
-@use "~/styles/layout";
-@use "~/components/Header/Header";
-@use "~/components/Menu/side-bars";
-@use "~/components/Button/button";
-@use "~/components/Footer/footer";
-@use "~/components/Welcome/Welcome";
-@use "~/components/PostCard/PostCard";
-@use "~/components/SearchBar/SearchBar";
-@use "~/components/SearchResults/SearchResults";
-@use "~/components/Navigation/PostNavigation";
-@use "~/styles/admin.scss";
+// 1. CARGA DE VARIABLES (Debe ir siempre primero)
+@use "variables" as var;
 
+// 2. RESET Y BASES (Usamos @use para archivos que inyectan estilos globales)
+@use "normalize.css";
+@use "global.scss";
+@use "layout.scss";
+
+// 3. ESTILOS DE PÁGINAS Y COMPONENTES
+// Usamos el alias ~ para que Vite resuelva las rutas sin errores de profundidad
+@use "postcard.scss";
+@use "blogpost.scss";
+@use "admin.scss";
+// @use "notfound.scss";
+
+// 4. COMPONENTES ESPECÍFICOS (Rutas relativas a src/styles/app.scss)
+@use "../components/Welcome/Welcome.scss";
+@use "../components/Footer/footer.scss";
+@use "../components/Menu/side-bars.scss";
+@use "../components/SearchBar/SearchBar.scss";
+@use "../components/SearchResults/SearchResults.scss";
+@use "../components/Navigation/PostNavigation.scss";
+@use "../components/User/UserSettings.scss";
 /* Transiciones de página */
 .page-fade-enter-active,
 .page-fade-exit-active {
