@@ -8,13 +8,19 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// 1. Protected: Solo verifica que el token sea válido y guarda los datos en Locals
+// 1. Protected: Busca el token en admin_jwt, luego en jwt y finalmente en el Header
 func Protected() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// 1. Intentar obtener token de la Cookie
-		tokenString := c.Cookies("jwt")
+		// --- LÓGICA DE PRIORIDAD DE COOKIES ---
+		// Primero buscamos la cookie de admin
+		tokenString := c.Cookies("admin_jwt")
 
-		// 2. Fallback al Header Authorization (útil para desarrollo/Postman)
+		// Si no hay, buscamos la de usuario regular
+		if tokenString == "" {
+			tokenString = c.Cookies("jwt")
+		}
+
+		// Fallback al Header Authorization (útil para desarrollo/Postman)
 		if tokenString == "" {
 			authHeader := c.Get("Authorization")
 			if strings.HasPrefix(authHeader, "Bearer ") {
@@ -22,10 +28,12 @@ func Protected() fiber.Handler {
 			}
 		}
 
+		// Si después de buscar en los 3 sitios no hay nada, error
 		if tokenString == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Inicie sesión para continuar"})
 		}
 
+		// Validar el Token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
@@ -34,6 +42,7 @@ func Protected() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Sesión inválida o expirada"})
 		}
 
+		// Extraer Claims y guardarlos en Locals
 		claims := token.Claims.(jwt.MapClaims)
 		c.Locals("user_id", claims["sub"])
 		c.Locals("role", claims["role"])
@@ -43,7 +52,7 @@ func Protected() fiber.Handler {
 	}
 }
 
-// 2. OnlyAdmin: Verifica que el rol sea admin
+// 2. OnlyAdmin: Se mantiene igual
 func OnlyAdmin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		role := c.Locals("role")
@@ -54,7 +63,7 @@ func OnlyAdmin() fiber.Handler {
 	}
 }
 
-// 3. OnlySuperAdmin: Verifica específicamente el flag is_super
+// 3. OnlySuperAdmin: Se mantiene igual
 func OnlySuperAdmin() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		isSuper, ok := c.Locals("is_super").(bool)

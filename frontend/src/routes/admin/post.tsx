@@ -2,6 +2,7 @@ import { createResource, createSignal, For, Show } from "solid-js";
 import { Title } from "@solidjs/meta";
 import { A } from "@solidjs/router";
 import { adminApi, blogApi } from "~/lib/api";
+import AdminGuard from "~/components/Admin/AdminGuard";
 
 export default function AdminPosts() {
   const [page, setPage] = createSignal(1);
@@ -20,7 +21,7 @@ export default function AdminPosts() {
   };
 
   return (
-    <>
+    <AdminGuard>
       <Title>Entradas | Admin</Title>
       <div class="admin-page">
         <div class="admin-page-header">
@@ -70,6 +71,6 @@ export default function AdminPosts() {
           </div>
         </Show>
       </div>
-    </>
+    </AdminGuard>
   );
 }

@@ -11,6 +11,7 @@
 @use "~/components/SearchBar/SearchBar";
 @use "~/components/SearchResults/SearchResults";
 @use "~/components/Navigation/PostNavigation";
+@use "~/styles/admin.scss";
 
 /* Transiciones de página */
 .page-fade-enter-active,

@@ -1,12 +1,18 @@
 @use "~/styles/variables" as var;
 
+/* ======================================================
+   CONTENEDOR MAESTRO (Centrado y limitado)
+   ====================================================== */
 .blog-post-container {
-  max-width: 1400px; // El contenedor general puede ser más amplio
+  max-width: 1100px; // Reducido de 1400 a 1100 para mejor legibilidad
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: 4rem 1.5rem;
+  min-height: 80vh;
 }
 
-/* --- LAYOUT DE 2 COLUMNAS --- */
+/* ======================================================
+   LAYOUT DE DOS COLUMNAS (Desktop)
+   ====================================================== */
 .post-detail-layout {
   display: flex;
   flex-direction: column;
@@ -15,134 +21,139 @@
   @media (min-width: 1024px) {
     flex-direction: row;
     align-items: flex-start;
+    gap: 4rem; // Más espacio entre la imagen y el texto
   }
 }
 
+/* --- COLUMNA VISUAL (Sticky) --- */
 .post-visual-side {
-  flex: 1.2;
+  flex: 1; // Ocupa el 45% aprox
+  
   @media (min-width: 1024px) {
     position: sticky;
-    top: 100px;
-    padding-right: 2rem; // Espacio entre las columnas
+    top: 100px; // Se queda pegado al bajar
+  }
+
+  .navigation-wrapper-simple {
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .visit-button-full {
+    display: block;
+    width: 100%;
+    background-color: var.$primary-color;
+    color: #121212;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 900;
+    text-decoration: none;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(var.$primary-color, 0.3);
+
+    &:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.1);
+      box-shadow: 0 6px 20px rgba(var.$primary-color, 0.5);
+    }
   }
 }
 
+/* --- COLUMNA DE TEXTO --- */
 .post-info-side {
-  flex: 1;
-  max-width: 800px; // Limita el ancho del texto en PC
-  margin: 0 auto;   // CENTRA EL TEXTO EN PC
-
-  @media (min-width: 1024px) {
-    margin: 0; // En PC, la columna se pega a la izquierda de su flex container
-  }
-
-  .post-header {
-    text-align: center; // Centra el título y la fecha
-    margin-bottom: 2rem;
-  }
-
-  .post-title {
-    font-family: var.$font-family-display;
-    font-size: 2.8rem;
-    color: var.$primary-color;
-    line-height: 1.1;
-    margin-bottom: 0.5rem;
-  }
+  flex: 1.2; // Ocupa el 55% aprox
   
-  .post-date {
-    color: #aaa;
-    font-size: 0.95rem;
-    margin-bottom: 2rem;
-  }
-
-  .post-description-lead {
-    font-size: 1.25rem;
-    color: var.$primary-color;
-    font-weight: 500;
-    line-height: 1.6;
+  .post-header {
     margin-bottom: 2.5rem;
-    font-style: italic;
-    border-left: 3px solid var.$primary-color;
-    padding-left: 1.5rem;
-  }
-
-  .post-content-body {
-    color: #e0e0e0;
-    line-height: 1.8;
-    font-size: 1.1rem;
-
-    h3, h4 {
-      color: white;
+    
+    .post-title {
       font-family: var.$font-family-display;
-      margin-top: 2.5rem;
-      margin-bottom: 1rem;
-      line-height: 1.2;
-    }
-
-    h3 { font-size: 1.8rem; }
-    h4 { font-size: 1.4rem; }
-
-    p { margin-bottom: 1.5rem; }
-    ul, ol { margin-bottom: 1.5rem; padding-left: 1.5rem; li { margin-bottom: 0.5rem; } }
-  }
-
-  /* --- SECCIÓN DE ETIQUETAS --- */
-  .tags-section {
-    margin-top: 3rem;
-    border-top: 1px solid #333;
-    padding-top: 1.5rem;
-    text-align: center; // Centra el título y los tags
-
-    .tags-title {
-      font-family: var.$font-family-display;
+      font-size: 3.5rem; // Más grande e imponente
       color: white;
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-      letter-spacing: 1px;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      text-transform: capitalize;
     }
 
-    .tags-container-flex {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      justify-content: center; // CENTRA LOS TAGS EN PC
-    }
-
-    .tag-pill {
-      display: inline-block;
+    .post-date {
       color: var.$primary-color;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.85rem;
-      padding: 0.4rem 0.8rem;
-      background: rgba(var.$primary-color, 0.1);
-      border-radius: 4px;
-      border-bottom: 1px solid transparent;
-      transition: all 0.2s;
-      &:hover { background: var.$primary-color; color: black; }
+      font-size: 0.9rem;
+      font-weight: bold;
+      opacity: 0.8;
     }
   }
 }
 
-/* --- BOTÓN VISITAR --- */
-.navigation-wrapper-simple {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
+/* ======================================================
+   CONTENIDO Y TIPOGRAFÍA
+   ====================================================== */
+.post-description-lead {
+  font-size: 1.3rem;
+  color: #6BBF5B;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  font-style: italic;
+  // Un borde sutil a la izquierda para destacar el resumen
+  padding-left: 1.5rem;
+  border-left: 2px solid rgba(var.$primary-color, 0.5);
 }
 
-.visit-button-full {
-  display: block;
-  width: 100%;
-  max-width: 400px;
-  background-color: var.$primary-color;
-  color: #121212;
-  text-align: center;
-  padding: 1rem;
-  border-radius: 12px;
-  font-weight: 800;
+.post-main-content {
+  color: #efefef;
+  line-height: 1.8;
+  font-size: 1.15rem;
+
+  h3 {
+    color: white;
+    font-family: var.$font-family-display;
+    font-size: 2rem;
+    margin: 3rem 0 1rem;
+  }
+
+  p { margin-bottom: 1.5rem; }
+}
+
+/* ======================================================
+   ETIQUETAS (Mejoradas)
+   ====================================================== */
+.tags-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid #333;
+
+  .tags-title {
+    font-family: var.$font-family-display;
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 2px;
+  }
+}
+
+.tags-container-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tag-pill {
+  color: white;
+  background: #252525;
+  border: 1px solid #444;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
   text-decoration: none;
-  font-size: 1.1rem;
-  transition: transform 0.2s ease;
-  &:hover { transform: scale(1.03); }
+  transition: all 0.2s;
+
+  &:hover {
+    background: var.$primary-color;
+    color: black;
+    border-color: var.$primary-color;
+  }
 }

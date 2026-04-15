@@ -37,9 +37,7 @@ export const FAQComponent = () => {
           Para devolverle al usuario el control en una web cada vez más
           saturada. En un entorno digital lleno de ruido y publicidad intrusiva,
           ofrecemos una
-          <span class="text-highlight">
-            alternativa organizada y sin distracciones
-          </span>
+          <span class="text-highlight"> alternativa organizada y sin distracciones </span>
           . Nuestro objetivo es que encuentres{" "}
           <span class="text-highlight">información rápida y verificada</span>.
         </p>
@@ -49,16 +47,14 @@ export const FAQComponent = () => {
         <h2 class="section-faq__question">¿Por qué hay pocos resultados?</h2>
         <p class="section-faq__answer">
           Click Alternativo es más un{" "}
-          <span class="text-highlight">catálogo seleccionado</span>
+          <span class="text-highlight"> catálogo seleccionado </span>
           que un motor de búsqueda tradicional. Usamos una
-          <span class="text-highlight">
-            base de datos propia actualizada manualmente
-          </span>
+          <span class="text-highlight"> base de datos propia actualizada manualmente </span>
           por nuestro equipo, lo que asegura calidad pero limita la cantidad de
           resultados.
           <br />
           Si no encuentras lo que buscas, puedes
-          <span class="text-highlight">sugerir páginas</span> a través de
+          <span class="text-highlight"> sugerir páginas</span> a través de
           nuestro panel de “Contacto”. Revisamos todas las propuestas y añadimos
           las que cumplen nuestros criterios.
         </p>
@@ -68,15 +64,15 @@ export const FAQComponent = () => {
         <h2 class="section-faq__question">¿Cómo puedo apoyar?</h2>
         <p class="section-faq__answer">
           Puedes ayudarnos uniéndote a nuestra comunidad en Patreon y acceder a
-          <span class="text-highlight">contenido exclusivo</span> mientras nos
+          <span class="text-highlight"> contenido exclusivo</span> mientras nos
           apoyas directamente. También puedes{" "}
-          <span class="text-highlight">compartir Click Alternativo</span> en
+          <span class="text-highlight"> compartir Click Alternativo</span> en
           redes sociales, comunidades y con amigos. Cada difusión nos ayuda a
           crecer.
           <br />
           Además, si conoces una página o herramienta útil que no esté en
           nuestro catálogo,
-          <span class="text-highlight">envíanos tu sugerencia</span> desde el
+          <span class="text-highlight"> envíanos tu sugerencia</span> desde el
           panel de “Contacto”.
         </p>
       </article>

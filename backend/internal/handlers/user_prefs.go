@@ -57,13 +57,32 @@ func (h *UserHandler) UpdateProfile(c *fiber.Ctx) error {
 }
 
 // GetProfile retorna los datos del usuario logueado con sus tags precargadas
+// backend/internal/handlers/user_prefs.go
+
 func (h *UserHandler) GetProfile(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(string)
-	var user models.User
+	role := c.Locals("role").(string) // Obtenido del JWT
 
+	// Si el rol en el token es ADMIN, buscamos en la tabla de Admins
+	if role == "admin" {
+		var admin models.Admin
+		if err := h.DB.First(&admin, "id = ?", userID).Error; err != nil {
+			return c.Status(404).JSON(fiber.Map{"error": "Admin no encontrado"})
+		}
+		return c.JSON(fiber.Map{
+			"id":       admin.ID,
+			"email":    admin.Email,
+			"role":     "admin",
+			"is_super": admin.IsSuperAdmin,
+		})
+	}
+
+	// Si es un usuario normal, buscamos en la tabla de Users
+	var user models.User
 	if err := h.DB.Preload("PreferredTags").First(&user, "id = ?", userID).Error; err != nil {
 		return c.Status(404).JSON(fiber.Map{"error": "Usuario no encontrado"})
 	}
 
+	// Añadimos el campo role explícitamente si no está en el struct
 	return c.JSON(user)
 }

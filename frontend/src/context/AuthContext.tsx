@@ -4,11 +4,13 @@ import { userApi, authApi } from "~/lib/api";
 const AuthContext = createContext<any>();
 
 export function AuthProvider(props: { children: JSX.Element }) {
+  
   const [user, { mutate, refetch }] = createResource(
     async () => {
       const data = await userApi.getProfile();
-      if (!data || data.error) return null;
-      return data;
+      if (!data || data.error || data.role === "admin") {
+        return null;
+      }
     },
     { deferStream: true }
   );

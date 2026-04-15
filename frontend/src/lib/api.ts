@@ -25,13 +25,13 @@ async function request(endpoint: string, options: RequestInit = {}) {
 
   // --- MAGIA DEL SSR: PASAR COOKIES DEL NAVEGADOR A GO ---
   if (isServer) {
-    const event = getRequestEvent();
-    const cookie = event?.request.headers.get("cookie");
-    if (cookie) {
-      headers.set("cookie", cookie);
-      // Opcional: console.log(`[SSR] Enviando cookie a Go en ${url}`);
-    }
+  const event = getRequestEvent();
+  const cookies = event?.request.headers.get("cookie");
+  if (cookies) {
+    // Pasamos todas las cookies (incluyendo jwt y admin_jwt)
+    headers.set("cookie", cookies); 
   }
+}
 
   try {
     const response = await fetch(url, {
@@ -106,28 +106,55 @@ export const userApi = {
     request("/user/profile", { method: "PUT", body: JSON.stringify(data) }),
 };
 
+// src/lib/api.ts - Añadir al final
+
 export const adminApi = {
-  login: (credentials: { email: string; password: string }) =>
-    request("/auth/admin/login", { method: "POST", body: JSON.stringify(credentials) }),
+  // --- GESTIÓN DE ENTTRADAS ---
+  createEntry: (formData: FormData) => request("/admin/entries", {
+    method: "POST",
+    body: formData, // Enviamos FormData directamente para las imágenes
+    headers: {}, // El navegador pondrá el boundary
+  }),
 
-  logout: () =>
-    request("/auth/admin/logout", { method: "POST" }),
+  updateEntry: (id: string, formData: FormData) => request(`/admin/entries/${id}`, {
+    method: "PUT",
+    body: formData,
+    headers: {},
+  }),
 
-  createCategory: (data: { name: string }) =>
-    request("/admin/categories", { method: "POST", body: JSON.stringify(data) }),
+  deleteEntry: (id: string) => request(`/admin/entries/${id}`, {
+    method: "DELETE"
+  }),
 
-  updateCategory: (id: number, data: { name: string }) =>
-    request(`/admin/categories/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  // --- GESTIÓN DE CATEGORÍAS ---
+  createCategory: (data: { name: string, type?: string }) => request("/admin/categories", {
+    method: "POST",
+    body: JSON.stringify(data)
+  }),
 
-  deleteCategory: (id: number) =>
-    request(`/admin/categories/${id}`, { method: "DELETE" }),
+  updateCategory: (id: number, data: { name: string }) => request(`/admin/categories/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data)
+  }),
 
-  createEntry: (data: any) =>
-    request("/admin/entries", { method: "POST", body: JSON.stringify(data) }),
+  deleteCategory: (id: number) => request(`/admin/categories/${id}`, {
+    method: "DELETE"
+  }),
 
-  updateEntry: (id: string, data: any) =>
-    request(`/admin/entries/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  // --- GESTIÓN DE STAFF (SUPER-ADMIN) ---
+  listAdmins: () => request("/admin/management/users"),
+  
+  createAdmin: (data: any) => request("/admin/management/users", {
+    method: "POST",
+    body: JSON.stringify(data)
+  }),
 
-  deleteEntry: (id: string) =>
-    request(`/admin/entries/${id}`, { method: "DELETE" }),
+  loginAdmin: (credentials: any) => request("/auth/admin/login", { 
+    method: "POST", 
+    body: JSON.stringify(credentials) 
+  }),
+
+  logout: () => request("/auth/admin/logout", { method: "POST" }),
+
+   getMe: () => request("/admin/me")
 };

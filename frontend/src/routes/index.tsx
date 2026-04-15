@@ -1,5 +1,5 @@
 import { createSignal, createEffect, onMount, For, Show, Suspense } from "solid-js";
-import { createAsync } from "@solidjs/router";
+import { createAsync, useSearchParams } from "@solidjs/router";
 import { Title, Meta } from "@solidjs/meta";
 import { blogApi } from "~/lib/api";
 import Welcome from "~/components/Welcome/Welcome";
@@ -12,17 +12,23 @@ export default function Home() {
   const [page, setPage] = createSignal(1);
   const [hasMore, setHasMore] = createSignal(true);
   const [loadingMore, setLoadingMore] = createSignal(false);
+  const [searchParams] = useSearchParams();
 
   // 2. Carga inicial (SSR para Google)
-  const initialData = createAsync(() => blogApi.getPaginated());
+  const initialData = createAsync(() => {
+    const term = Array.isArray(searchParams.search) ? searchParams.search[0] : (searchParams.search || "");
+    return blogApi.getPaginated("", 1, term);
+  });
+
 
   // 3. Sincronizar datos iniciales cuando Bun los entrega al navegador
   createEffect(() => {
     const data = initialData();
-    if (data && data.results) {
-      setPosts(data.results);
+    if (data && !data.error) {
+      console.log("Actualizando posts para:", searchParams.search);
+      setPosts(data.results || []);
       setPage(1);
-      setHasMore(data.results.length === 20);
+      setHasMore(data.results?.length === 20);
     }
   });
 
@@ -68,9 +74,7 @@ export default function Home() {
       <Welcome />
 
       <section class="latest-feed container mx-auto p-4">
-        <h2 class="text-2xl font-bold mb-8 border-b border-[#6BBF5B] pb-2">
-          Explora el Catálogo
-        </h2>
+
 
         {/* Renderizado de la grilla */}
         <div class="posts-grid">

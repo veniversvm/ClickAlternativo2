@@ -1,22 +1,34 @@
+import { useNavigate } from "@solidjs/router";
 import { IoSearch } from 'solid-icons/io';
 import "./SearchBar.scss";
 
-interface SearchProps {
-  size?: 'small' | 'large';
-}
+export const Search = (props: { size?: 'small' | 'large' }) => {
+  const navigate = useNavigate();
 
-export const Search = (props: SearchProps ) => {
+  const handleSearch = (e: SubmitEvent) => {
+    e.preventDefault(); // <--- VITAL: Evita que la página se recargue
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const query = formData.get("search")?.toString() || "";
+    
+    if (query.trim()) {
+      // Navegamos a la ruta de búsqueda usando el router de Solid
+      navigate(`/search?search=${encodeURIComponent(query)}`);
+    }
+  };
+
   return (
     <div class="search-wrapper" classList={{ "search-wrapper--small": props.size === 'small' }}>
-      <form action="/search" method="get" class="search-form">
+      <form onSubmit={handleSearch} class="search-form">
         <input
           type="search"
-          name="search" // <--- DEBE SER "search"
+          name="search"
           placeholder="Buscar curadurías..."
           class="search-input"
           required
         />
-        <button type="submit" class="search-button">🔍</button>
+        <button type="submit" class="search-button">
+          <IoSearch size={22} />
+        </button>
       </form>
     </div>
   );

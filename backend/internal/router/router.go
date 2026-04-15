@@ -26,6 +26,7 @@ func SetupRoutes(app *fiber.App,
 	// Autenticación Mixta
 	auth := api.Group("/auth")
 	auth.Post("/admin/login", adminHandler.Login)
+	auth.Post("/admin/logout", adminHandler.Logout)
 	auth.Post("/user/register", userAuthHandler.Register)
 	auth.Post("/user/login", userAuthHandler.Login)
 	auth.Post("/user/logout", userAuthHandler.Logout)
@@ -49,6 +50,7 @@ func SetupRoutes(app *fiber.App,
 	admin := api.Group("/admin")
 	admin.Use(middleware.Protected())
 	admin.Use(middleware.OnlyAdmin())
+	admin.Get("/me", mgmtHandler.GetCurrentAdmin) // Ruta: /api/v1/admin/me
 
 	// Gestión de Categorías
 	admin.Post("/categories", categoryHandler.Create)

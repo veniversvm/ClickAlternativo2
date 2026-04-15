@@ -1,6 +1,7 @@
 import { createResource, createSignal, For, Show } from "solid-js";
 import { Title } from "@solidjs/meta";
 import { blogApi, adminApi } from "~/lib/api";
+import AdminGuard from "~/components/Admin/AdminGuard";
 
 export default function AdminTags() {
   const [tags, { refetch }] = createResource(() => blogApi.getCategories());
@@ -35,7 +36,7 @@ export default function AdminTags() {
   };
 
   return (
-    <>
+    <AdminGuard>
       <Title>Tags | Admin</Title>
       <div class="admin-page">
         <h2>Tags / Categorías</h2>
@@ -101,6 +102,6 @@ export default function AdminTags() {
           </table>
         </Show>
       </div>
-    </>
+    </AdminGuard>
   );
 }

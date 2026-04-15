@@ -100,3 +100,19 @@ func (h *AdminMgmtHandler) List(c *fiber.Ctx) error {
 	h.DB.Find(&admins)
 	return c.JSON(admins)
 }
+
+func (h *AdminMgmtHandler) GetCurrentAdmin(c *fiber.Ctx) error {
+	adminID := c.Locals("user_id").(string)
+
+	var admin models.Admin
+	if err := h.DB.First(&admin, "id = ?", adminID).Error; err != nil {
+		return c.Status(404).JSON(fiber.Map{"error": "Admin no encontrado"})
+	}
+
+	return c.JSON(fiber.Map{
+		"id":       admin.ID,
+		"email":    admin.Email,
+		"is_super": admin.IsSuperAdmin,
+		"role":     "admin",
+	})
+}

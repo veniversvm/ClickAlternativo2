@@ -8,6 +8,7 @@ import SideBarMenu from "./components/Menu/SideBarMenu";
 import Footer from "./components/Footer/Footer";
 import "./styles/app.scss";
 import { AuthProvider } from "./context/AuthContext";
+import { AdminAuthProvider } from "./context/AdminAuthContext";
 
 function AppShell(props: { children: any }) {
   const [isMenuOpen, setIsMenuOpen] = createSignal(false);
@@ -32,7 +33,10 @@ function AppShell(props: { children: any }) {
             fallback={(err, reset) => (
               <div class="critical-error">
                 <h2>Ups, algo salió mal</h2>
-                <p>El sitio sigue funcionando, pero esta sección no puede cargarse.</p>
+                <p>
+                  El sitio sigue funcionando, pero esta sección no puede
+                  cargarse.
+                </p>
                 <div style={{ display: "flex", gap: "1rem" }}>
                   <button onClick={reset}>Reintentar</button>
                   <button onClick={() => (window.location.href = "/")}>
@@ -63,9 +67,11 @@ export default function App() {
   return (
     // AuthProvider envuelve todo — se monta UNA sola vez y nunca se destruye
     <AuthProvider>
-      <Router root={(props) => <AppShell>{props.children}</AppShell>}>
-        <FileRoutes />
-      </Router>
+      <AdminAuthProvider>
+        <Router root={(props) => <AppShell>{props.children}</AppShell>}>
+          <FileRoutes />
+        </Router>
+      </AdminAuthProvider>
     </AuthProvider>
   );
 }

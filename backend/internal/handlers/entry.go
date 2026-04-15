@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -136,6 +137,10 @@ func (h *EntryHandler) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
+///////////
+///////////
+///////////
+
 func (h *EntryHandler) GetPaginated(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	search := strings.TrimSpace(c.Query("search", ""))
@@ -188,12 +193,22 @@ func (h *EntryHandler) GetPaginated(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Error al consultar la base de datos"})
 	}
 
+	if search != "" {
+		log.Printf("Busqueda: %s", search)
+	}
+	log.Printf("Numero de entradas: ")
+	log.Println(len(entries))
+
 	return c.JSON(fiber.Map{
 		"page":    page,
 		"limit":   limit,
 		"results": entries,
 	})
 }
+
+/////////////
+/////////////
+/////////////
 
 // GetBySlug - Búsqueda detallada para la página de la entrada
 func (h *EntryHandler) GetBySlug(c *fiber.Ctx) error {

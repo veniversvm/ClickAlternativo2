@@ -35,25 +35,27 @@ func (h *AdminHandler) Login(c *fiber.Ctx) error {
 	token, _ := h.AuthService.GenerateJWT(admin.ID.String(), "admin", admin.IsSuperAdmin)
 
 	c.Cookie(&fiber.Cookie{
-		Name:     "jwt",
+		Name:     "admin_jwt",
 		Value:    token,
 		Expires:  time.Now().Add(72 * time.Hour),
 		HTTPOnly: true,
 		Secure:   false,
 		SameSite: "Lax",
+		Path:     "/",
 	})
 
 	return c.JSON(fiber.Map{"message": "Bienvenido Admin"})
 }
-
 func (h *AdminHandler) Logout(c *fiber.Ctx) error {
 	c.Cookie(&fiber.Cookie{
-		Name:     "jwt",
+		Name:     "admin_jwt", // <--- DEBE SER ESTE NOMBRE
 		Value:    "",
 		Expires:  time.Now().Add(-time.Hour),
 		HTTPOnly: true,
-		Secure:   false,
+		Secure:   false, // true en producción
 		SameSite: "Lax",
+		Path:     "/", // <--- OBLIGATORIO: El mismo path que el login
 	})
-	return c.JSON(fiber.Map{"message": "Sesión de Admin cerrada"})
+
+	return c.Status(200).JSON(fiber.Map{"message": "Sesión de Admin cerrada"})
 }

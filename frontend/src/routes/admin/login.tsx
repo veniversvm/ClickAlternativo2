@@ -1,56 +1,86 @@
-import { createSignal } from "solid-js";
-import { useNavigate } from "@solidjs/router";
+import { createSignal, onMount, Show } from "solid-js";
+import { useNavigate, A } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { useAdminAuth } from "~/context/AdminAuthContext";
+
+// --- VITAL: Desactiva el SSR para esta página ---
+export const config = { ssr: false };
 
 export default function AdminLogin() {
   const admin = useAdminAuth();
   const navigate = useNavigate();
+
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
   const [error, setError] = createSignal("");
-  const [loading, setLoading] = createSignal(false);
+  const [isSubmitting, setIsSubmitting] = createSignal(false);
+
+  // Al no haber SSR, onMount se ejecuta inmediatamente al cargar
+  onMount(() => {
+    if (admin.isLoggedIn()) {
+      navigate("/admin");
+    }
+  });
 
   const handleLogin = async (e: Event) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
     setError("");
 
-    const ok = await admin.login(email(), password());
-    if (ok) {
-      navigate("/admin");
-    } else {
-      setError("Credenciales inválidas");
+    try {
+        const success = await admin.login(email(), password());
+        if (success) {
+            // USAR ESTO en lugar de navigate
+            window.location.href = "/admin"; 
+        } else {
+            setError("Credenciales incorrectas.");
+        }
+    } catch (err) {
+        setError("Error de conexión.");
+    } finally {
+        setIsSubmitting(false);
     }
-    setLoading(false);
-  };
+};
 
   return (
-    <>
-      <Title>Login Admin | Click Alternativo</Title>
-      <div class="admin-login-page">
+    <main class="admin-login-page">
+      <Title>Staff Login | Click Alternativo</Title>
+      <div class="admin-login-container">
         <form class="admin-login-form" onSubmit={handleLogin}>
-          <h1>Panel de Administración</h1>
+          <h1>Panel Control</h1>
+          <p>Solo personal autorizado</p>
+
           <input
             type="email"
-            placeholder="Email"
+            placeholder="admin@clickalternativo.com"
             value={email()}
             onInput={(e) => setEmail(e.currentTarget.value)}
             required
+            class="admin-input"
           />
+
           <input
             type="password"
             placeholder="Contraseña"
             value={password()}
             onInput={(e) => setPassword(e.currentTarget.value)}
             required
+            class="admin-input"
           />
-          {error() && <p class="admin-error">{error()}</p>}
-          <button type="submit" disabled={loading()}>
-            {loading() ? "Verificando..." : "Entrar"}
+
+          <Show when={error()}>
+            <p class="admin-error-msg">{error()}</p>
+          </Show>
+
+          <button 
+            type="submit" 
+            class="admin-login-btn"
+            disabled={isSubmitting()}
+          >
+            {isSubmitting() ? "Autenticando..." : "Acceder al Panel"}
           </button>
         </form>
       </div>
-    </>
+    </main>
   );
 }
