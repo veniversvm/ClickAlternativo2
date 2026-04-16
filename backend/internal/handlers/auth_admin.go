@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -34,14 +35,19 @@ func (h *AdminHandler) Login(c *fiber.Ctx) error {
 	// Importante: admin.IsSuperAdmin se pasa al JWT
 	token, _ := h.AuthService.GenerateJWT(admin.ID.String(), "admin", admin.IsSuperAdmin)
 
+	// En internal/handlers/auth_user.go y auth_admin.go
+	isProd := os.Getenv("NODE_ENV") == "production"
+
 	c.Cookie(&fiber.Cookie{
-		Name:     "admin_jwt",
+		Name:     "jwt", // o "admin_jwt"
 		Value:    token,
 		Expires:  time.Now().Add(72 * time.Hour),
 		HTTPOnly: true,
-		Secure:   false,
-		SameSite: "Lax",
 		Path:     "/",
+		SameSite: "Lax",
+		// --- ESTO ES LO MÁS IMPORTANTE ---
+		Secure: isProd,                     // True si es HTTPS (Producción)
+		Domain: os.Getenv("COOKIE_DOMAIN"), // e.g. "clickalternativo.com"
 	})
 
 	return c.JSON(fiber.Map{"message": "Bienvenido Admin"})

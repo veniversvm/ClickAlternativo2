@@ -1,0 +1,36 @@
+# --- ETAPA 1: Construcción ---
+FROM oven/bun:1.1-alpine AS builder
+
+WORKDIR /app
+
+# Copiar archivos de dependencias para aprovechar la caché de Docker
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile
+
+# Copiar el resto del código
+COPY . .
+
+# Variables de entorno necesarias durante el build (Vite las inyecta)
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
+# Construir la aplicación para producción (Nitro)
+RUN bun run build
+
+# --- ETAPA 2: Ejecución ---
+FROM oven/bun:1.1-alpine AS runner
+
+WORKDIR /app
+
+# Copiar solo lo necesario de la etapa anterior (la carpeta .output generada por Nitro)
+COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/public ./public
+
+# Configuración de entorno de ejecución
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+# Ejecutar el servidor de Nitro generado por SolidStart
+CMD ["bun", ".output/server/index.mjs"]

@@ -9,7 +9,7 @@ export function AuthProvider(props: { children: JSX.Element }) {
     async () => {
       const data = await userApi.getProfile();
       // 1. Si no hay datos o hay error de API, retornamos null (No logueado)
-      console.log("DATA ",data)
+      // console.log("DATA ",data)
       if (!data || data.error) {
         return null;
       }

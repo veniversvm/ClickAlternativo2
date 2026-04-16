@@ -1,0 +1,21 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # VITAL: El navegador debe pedir los datos a la URL pública HTTPS
+        - VITE_API_URL=https://clickalternativo.com/api/v1
+    container_name: click_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # URL interna: Bun (Docker) -> Go (Docker) por el puerto 8080
+      - SERVER_API_URL=http://click_api:8080/api/v1
+    networks:
+      - click_network
+
+networks:
+  click_network:
+    external: true # Le dice a este compose que use la red que ya creamos

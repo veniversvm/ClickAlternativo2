@@ -32,6 +32,11 @@ COPY --from=builder /app/api .
 # COPIAR LA CARPETA DE LOGOS (Si no está, el código dará error)
 COPY assets ./assets 
 
+# Cambiamos el dueño de la carpeta assets por si Go necesita escribir o leer con permisos
+RUN chown -R clickuser:clickuser /app
+
+USER clickuser
+
 # Exponer el puerto
 EXPOSE 8080
 

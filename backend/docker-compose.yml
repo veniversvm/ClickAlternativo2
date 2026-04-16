@@ -2,35 +2,35 @@ services:
   db:
     image: postgres:15-alpine
     container_name: click_alt_db
+    restart: unless-stopped # VITAL para producción
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    # ports:
-    #   - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - click_network # <--- AGREGAR ESTO
+      - click_network 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
   minio:
     image: minio/minio
     container_name: click_minio
+    restart: unless-stopped
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9000:9000" # API de objetos (Nginx la usa)
+      - "9001:9001" # Consola Web (puedes cerrarlo después)
     environment:
       MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID}
       MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
     volumes:
       - minio_data:/data
     networks:
-      - click_network # <--- AGREGAR ESTO
+      - click_network
     command: server /data --console-address ":9001"
 
   minio-init:
@@ -38,10 +38,10 @@ services:
     depends_on:
       - minio
     networks:
-      - click_network # <--- AGREGAR ESTO
+      - click_network
     entrypoint: >
       /bin/sh -c "
-      until (/usr/bin/mc alias set myminio http://minio:9000 ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}) do echo 'Esperando a MinIO...' && sleep 1; done;
+      until (/usr/bin/mc alias set myminio http://minio:9000 ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}) do sleep 1; done;
       /usr/bin/mc mb myminio/${AWS_BUCKET_NAME} || true;
       /usr/bin/mc anonymous set public myminio/${AWS_BUCKET_NAME};
       exit 0;
@@ -50,7 +50,9 @@ services:
   api:
     build:
       context: .
+      dockerfile: dockerfile # Asegúrate que coincida con tu archivo (D mayúscula o minúscula)
     container_name: click_api
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
@@ -61,16 +63,16 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: '2.0' # Límite de 2 núcleos solicitado
           memory: 512M
     ports:
       - "8080:8080"
     networks:
-      - click_network # <--- YA ESTABA, ESTÁ BIEN
+      - click_network
 
 networks:
   click_network:
-    driver: bridge
+    external: true # <--- CAMBIO CRÍTICO: Permite que el frontend se una a esta red
 
 volumes:
   postgres_data:

@@ -180,16 +180,20 @@ func (h *UserAuthHandler) GoogleCallback(c *fiber.Ctx) error {
 	// 4. Generar nuestro JWT y poner la Cookie
 	jwtToken, _ := h.AuthService.GenerateJWT(user.ID.String(), "user", false)
 
+	// En internal/handlers/auth_user.go y auth_admin.go
+	isProd := os.Getenv("NODE_ENV") == "production"
+
 	c.Cookie(&fiber.Cookie{
-		Name:     "jwt",
+		Name:     "jwt", // o "admin_jwt"
 		Value:    jwtToken,
 		Expires:  time.Now().Add(72 * time.Hour),
 		HTTPOnly: true,
-		Secure:   false,
-		SameSite: "Lax",
 		Path:     "/",
+		SameSite: "Lax",
+		// --- ESTO ES LO MÁS IMPORTANTE ---
+		Secure: isProd,                     // True si es HTTPS (Producción)
+		Domain: os.Getenv("COOKIE_DOMAIN"), // e.g. "clickalternativo.com"
 	})
-
 	// --- ENVIAR CORREO SOLO SI ES NUEVO ---
 	if isNewUser && h.Notification != nil {
 		go h.Notification.SendWelcomeEmail(user)

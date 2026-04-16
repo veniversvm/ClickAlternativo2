@@ -25,7 +25,7 @@ export default function Home() {
   createEffect(() => {
     const data = initialData();
     if (data && !data.error) {
-      console.log("Actualizando posts para:", searchParams.search);
+      // console.log("Actualizando posts para:", searchParams.search);
       setPosts(data.results || []);
       setPage(1);
       setHasMore(data.results?.length === 20);
