@@ -22,6 +22,8 @@ FROM alpine:latest
 # Instalar certificados (Crítico para que el SDK de AWS S3 funcione vía HTTPS)
 RUN apk --no-cache add ca-certificates tzdata
 
+# Creamos un usuario de sistema para no correr como root
+RUN adduser -D -u 1000 clickuser
 WORKDIR /app/
 
 # Copiar solo el binario desde la etapa de compilación
