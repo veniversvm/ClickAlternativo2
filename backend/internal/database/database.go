@@ -38,6 +38,19 @@ func InitDB() *gorm.DB {
 		log.Fatalf("❌ Error en la migración de tablas: %v", err)
 	}
 
+	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS pg_trgm;").Error; err != nil {
+		log.Printf("⚠️ No se pudo instalar la extensión pg_trgm: %v", err)
+	}
+
+	if err = db.Exec("CREATE INDEX IF NOT EXISTS idx_entries_search_gin ON entries USING gin (title gin_trgm_ops, description gin_trgm_ops, content gin_trgm_ops)").Error; err != nil {
+		log.Printf("⚠️ No se pudo instalar crear el indice idx_entries_search_gin: %v", err)
+	}
+
+	// También para las categorías (tags)
+	if err = db.Exec("CREATE INDEX IF NOT EXISTS idx_categories_name_gin ON categories USING gin (name gin_trgm_ops)").Error; err != nil {
+		log.Printf("⚠️ No se pudo instalar crear el indice idx_categories_name_gin: %v", err)
+	}
+
 	log.Println("🚀 Tablas migradas/actualizadas correctamente")
 	return db
 }
