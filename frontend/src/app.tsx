@@ -1,14 +1,15 @@
-// src/app.tsx
-import { createSignal, ErrorBoundary, Suspense } from "solid-js";
-import { Link, MetaProvider, Title, Meta } from "@solidjs/meta"; // Html eliminado
-import { Router } from "@solidjs/router";
+import { createSignal, ErrorBoundary, Show, Suspense } from "solid-js";
+import { Link, MetaProvider, Title, Meta } from "@solidjs/meta";
+import { Router, useLocation } from "@solidjs/router"; // Importamos useLocation
 import { FileRoutes } from "@solidjs/start/router";
 import { Transition } from "solid-transition-group";
+import { Key } from "@solid-primitives/keyed"; // <
 import Header from "./components/Header/Header";
 import SideBarMenu from "./components/Menu/SideBarMenu";
 import Footer from "./components/Footer/Footer";
 import { AuthProvider } from "./context/AuthContext";
 import { AdminAuthProvider } from "./context/AdminAuthContext";
+import { HomeStoreProvider } from "./context/HomeStore";
 import "./styles/app.scss";
 
 function AppShell(props: { children: any }) {
@@ -16,19 +17,12 @@ function AppShell(props: { children: any }) {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen());
   const closeMenu = () => setIsMenuOpen(false);
 
+  // VITAL: location sirve para avisarle a la transición que la ruta cambió
+  const location = useLocation();
+
   return (
     <MetaProvider>
-      {/* METADATOS DE LOCALIZACIÓN (SEO Social y Google) */}
-      <Title>Click Alternativo | Curaduría de Contenido Humano</Title>
-      <Meta name="description" content="Contenido web seleccionado a mano con criterio humano. Noticias, Software, Gaming y más." />
-      
-      {/* Geo-tagging y Locale para Redes Sociales */}
-      <Meta property="og:locale" content="es_ES" />
-      <Meta property="og:type" content="website" />
-      <Meta property="og:site_name" content="Click Alternativo" />
-      
       <Link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo.svg" />
-      
       <div class="app-container">
         <Header isMenuOpen={isMenuOpen()} onToggleMenu={toggleMenu} />
         <SideBarMenu isOpen={isMenuOpen()} onClose={closeMenu} />
@@ -40,26 +34,32 @@ function AppShell(props: { children: any }) {
 
         <main class="main-content">
           <ErrorBoundary
-            fallback={(err, reset) => (
-              <div class="critical-error">
-                <h2>Error de visualización</h2>
-                <p>Lo sentimos, ha ocurrido un problema al cargar esta sección.</p>
-                <div style={{ display: "flex", gap: "1rem", "justify-content": "center" }}>
-                  <button class="btn-primary" onClick={reset}>Reintentar</button>
-                  <button class="btn-secondary" onClick={() => (window.location.href = "/")}>Volver al Inicio</button>
+            fallback={(err, reset) => {
+              // Log para depurar qué está rompiendo el sitio realmente
+              console.error("ErrorBoundary caught:", err);
+              return (
+                <div class="critical-error">
+                  <h2>Error de visualización</h2>
+                  <p>
+                    Detalle técnico:{" "}
+                    {err?.message || "Conflicto de hidratación"}
+                  </p>
+                  <button class="btn-primary" onClick={reset}>
+                    Reintentar
+                  </button>
                 </div>
-              </div>
-            )}
+              );
+            }}
           >
             <Suspense fallback={<div class="page-loader">Cargando...</div>}>
+              {/* 
+                FIX 1: mode="out-in" (con guión)
+                FIX 2: Encapsular children en un div con KEY único por ruta
+              */}
               <Transition name="page-fade" mode="outin">
-                {/* 
-                  Usamos un div simple como contenedor de transición 
-                  para asegurar que SolidJS gestione bien las llaves del DOM.
-                */}
-                <div class="page-wrapper">
-                  {props.children}
-                </div>
+                <Show when={location.pathname} keyed>
+                  <div class="page-transition-wrapper">{props.children}</div>
+                </Show>
               </Transition>
             </Suspense>
           </ErrorBoundary>
@@ -75,9 +75,12 @@ export default function App() {
   return (
     <AuthProvider>
       <AdminAuthProvider>
-        <Router root={(props) => <AppShell>{props.children}</AppShell>}>
-          <FileRoutes />
-        </Router>
+        <HomeStoreProvider>
+          {/* El Router DEBE ser el componente raíz que define el root layout */}
+          <Router root={(props) => <AppShell>{props.children}</AppShell>}>
+            <FileRoutes />
+          </Router>
+        </HomeStoreProvider>
       </AdminAuthProvider>
     </AuthProvider>
   );

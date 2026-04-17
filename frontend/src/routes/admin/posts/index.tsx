@@ -40,7 +40,7 @@ export default function AdminPostsList() {
               </Show>
             </p>
           </div>
-          <A href="/admin/post/new" class="admin-btn-primary">+ NUEVA ENTRADA</A>
+          <A href="/admin/posts/new" class="admin-btn-primary">+ NUEVA ENTRADA</A>
         </div>
 
         {/* BARRA DE BÚSQUEDA: Independiente */}
