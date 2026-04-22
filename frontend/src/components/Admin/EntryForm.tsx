@@ -3,9 +3,9 @@ import { adminApi, blogApi } from "~/lib/api";
 import "./EntryForm.scss";
 
 interface ImageSlot {
-  url: string | null;       // URL existente del backend
-  file: File | null;        // Archivo nuevo
-  removed: boolean;         // Marcado para borrar
+  url: string | null;
+  file: File | null;
+  removed: boolean;
 }
 
 const emptySlot = (): ImageSlot => ({ url: null, file: null, removed: false });
@@ -16,9 +16,13 @@ export default function EntryForm(props: { initialData?: any; onSuccess?: () => 
   // --- ESTADOS DE TEXTO ---
   const [title, setTitle] = createSignal("");
   const [description, setDescription] = createSignal("");
-  const [content, setContent] = createSignal(""); // <--- AÑADIDO
+  const [content, setContent] = createSignal("");
   const [contentUrl, setContentUrl] = createSignal("");
   const [selectedCats, setSelectedCats] = createSignal<number[]>([]);
+  
+  // --- ESTADO DEL FILTRO DE ETIQUETAS ---
+  const [tagQuery, setTagQuery] = createSignal("");
+
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [validationError, setValidationError] = createSignal("");
 
@@ -26,33 +30,38 @@ export default function EntryForm(props: { initialData?: any; onSuccess?: () => 
     emptySlot(), emptySlot(), emptySlot(),
   ]);
 
-  // --- CARGAR DATOS (EDICIÓN) ---
- createEffect(() => {
-  if (props.initialData) {
-    const d = props.initialData;
-    // console.log("Datos recibidos para edición:", d); // <--- MIRA ESTO EN LA CONSOLA (F12)
+  // --- LÓGICA DE FILTRADO ---
+  const filteredTags = createMemo(() => {
+    const list = categories() || [];
+    const search = tagQuery().toLowerCase().trim();
+    if (!search) return list;
+    return list.filter((cat: any) => 
+      cat.name.toLowerCase().includes(search)
+    );
+  });
 
-    setTitle(d.title || "");
-    setDescription(d.description || "");
-    setContent(d.content || "");
-    setContentUrl(d.content_url || "");
-    setSelectedCats(d.categories?.map((c: any) => c.id) || []);
+  createEffect(() => {
+    if (props.initialData) {
+      const d = props.initialData;
+      setTitle(d.title || "");
+      setDescription(d.description || "");
+      setContent(d.content || "");
+      setContentUrl(d.content_url || "");
+      setSelectedCats(d.categories?.map((c: any) => c.id) || []);
 
-    // PROBABILIDAD ALTA: Tu backend envía 'image_url1' (sin guion bajo antes del 1)
-    // Intentamos ambas por seguridad
-    const urls = [
-      d.image_url1 || d.image_url_1 || null,
-      d.image_url2 || d.image_url_2 || null,
-      d.image_url3 || d.image_url_3 || null
-    ];
+      const urls = [
+        d.image_url1 || d.image_url_1 || null,
+        d.image_url2 || d.image_url_2 || null,
+        d.image_url3 || d.image_url_3 || null
+      ];
 
-    setSlots(urls.map((url) => ({ 
-      url: url, 
-      file: null, 
-      removed: false 
-    })) as [ImageSlot, ImageSlot, ImageSlot]);
-  }
-});
+      setSlots(urls.map((url) => ({ 
+        url: url, 
+        file: null, 
+        removed: false 
+      })) as [ImageSlot, ImageSlot, ImageSlot]);
+    }
+  });
 
   const updateSlot = (index: number, patch: Partial<ImageSlot>) => {
     setSlots((prev) => {
@@ -71,11 +80,10 @@ export default function EntryForm(props: { initialData?: any; onSuccess?: () => 
     updateSlot(index, { url: null, file: null, removed: true });
   };
 
-  // Función de visualización segura
   const getPreview = (slot: ImageSlot) => {
     if (slot.removed) return null;
-    if (slot.file) return URL.createObjectURL(slot.file); // Archivo local
-    return slot.url; // URL de S3/MinIO
+    if (slot.file) return URL.createObjectURL(slot.file);
+    return slot.url;
   };
 
   const hasAtLeastOneImage = createMemo(() => {
@@ -85,7 +93,7 @@ export default function EntryForm(props: { initialData?: any; onSuccess?: () => 
   const isFormValid = createMemo(() =>
     title().trim() !== "" &&
     description().trim() !== "" &&
-    content().trim() !== "" && // <--- VALIDAR CONTENIDO
+    content().trim() !== "" &&
     contentUrl().trim() !== "" &&
     selectedCats().length > 0 &&
     hasAtLeastOneImage()
@@ -99,13 +107,12 @@ export default function EntryForm(props: { initialData?: any; onSuccess?: () => 
     const fd = new FormData();
     fd.append("title", title());
     fd.append("description", description());
-    fd.append("content", content()); // <--- ENVIAR CONTENIDO
+    fd.append("content", content());
     fd.append("content_url", contentUrl());
     fd.append("category_ids", selectedCats().join(","));
 
     slots().forEach((s, i) => {
       if (s.file) fd.append(`image${i + 1}`, s.file);
-      // Opcional: enviar que se mantiene/borra para el backend
       if (s.removed) fd.append(`remove_image${i + 1}`, "true");
     });
 
@@ -137,17 +144,31 @@ export default function EntryForm(props: { initialData?: any; onSuccess?: () => 
             value={content()} 
             onInput={(e) => setContent(e.currentTarget.value)} 
             required 
-            style={{ "min-height": "300px" }}
           />
 
           <label>Categorías</label>
+          {/* --- NUEVO FILTRO DE ETIQUETAS --- */}
+          <div class="tag-filter-wrapper">
+            <input 
+              type="text" 
+              placeholder="🔍 Filtrar etiquetas..." 
+              value={tagQuery()}
+              onInput={(e) => setTagQuery(e.currentTarget.value)}
+              class="tag-search-input"
+            />
+          </div>
+
           <div class="categories-selector-box">
-            <For each={categories()}>
+            <For each={filteredTags()} fallback={<p class="no-tags-found">No se encontraron etiquetas.</p>}>
               {(cat: any) => (
-                <span class="cat-chip" classList={{ selected: selectedCats().includes(cat.id) }} onClick={() => {
-                  const id = cat.id;
-                  setSelectedCats(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-                }}>
+                <span 
+                  class="cat-chip" 
+                  classList={{ selected: selectedCats().includes(cat.id) }} 
+                  onClick={() => {
+                    const id = cat.id;
+                    setSelectedCats(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+                  }}
+                >
                   {cat.name}
                 </span>
               )}
@@ -185,6 +206,10 @@ export default function EntryForm(props: { initialData?: any; onSuccess?: () => 
           </div>
         </div>
       </div>
+
+      <Show when={validationError()}>
+        <div class="error-msg-banner">{validationError()}</div>
+      </Show>
 
       <button type="submit" class="submit-btn-main" disabled={!isFormValid() || isSubmitting()}>
         {isSubmitting() ? "GUARDANDO..." : (props.initialData ? "ACTUALIZAR" : "PUBLICAR")}

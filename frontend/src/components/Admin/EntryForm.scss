@@ -142,3 +142,39 @@
     }
   }
 }
+
+.tag-filter-wrapper {
+  margin-bottom: 10px;
+  
+  .tag-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #6BBF5B; // Color verde para el texto de búsqueda
+    font-size: 0.9rem;
+    
+    &:focus {
+      border-color: #6BBF5B;
+      outline: none;
+    }
+  }
+}
+
+.no-tags-found {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  padding: 10px;
+}
+
+.error-msg-banner {
+  background: rgba(255, 0, 0, 0.1);
+  color: #ff4757;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}

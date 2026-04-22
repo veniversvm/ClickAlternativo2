@@ -22,7 +22,26 @@ function AppShell(props: { children: any }) {
 
   return (
     <MetaProvider>
-      <Link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo.svg" />
+      {/* 1. Iconos del navegador y dispositivos móviles */}
+      <Link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo2.svg" />
+      <Link rel="apple-touch-icon" href="/Logo/MiniLogo2.svg" />
+
+      {/* 2. SEO Estándar en Español */}
+      <Title>Click Alternativo | Curaduría de Contenido Humano</Title>
+      <Meta name="description" content="Selección manual de lo mejor de la web: Noticias, Software, Gaming y Cine." />
+
+      {/* 3. Open Graph - Esto es lo que lee WhatsApp y Facebook */}
+      <Meta property="og:type" content="website" />
+      <Meta property="og:title" content="Click Alternativo" />
+      <Meta property="og:description" content="Contenido web seleccionado a mano con criterio humano." />
+      <Meta property="og:url" content="https://clickalternativo.com" />
+      {/* VITAL: URL absoluta para que WhatsApp la encuentre siempre */}
+      <Meta property="og:image" content="https://clickalternativo.com/Logo/LogoClickAlternativo.png" />
+      <Meta property="og:image:alt" content="Logo de Click Alternativo" />
+
+      {/* 4. Twitter Cards */}
+      <Meta name="twitter:card" content="summary_large_image" />
+      <Meta name="twitter:image" content="https://clickalternativo.com/Logo/LogoClickAlternativo.png" />
       <div class="app-container">
         <Header isMenuOpen={isMenuOpen()} onToggleMenu={toggleMenu} />
         <SideBarMenu isOpen={isMenuOpen()} onClose={closeMenu} />
