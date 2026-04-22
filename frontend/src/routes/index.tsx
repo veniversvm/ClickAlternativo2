@@ -69,7 +69,7 @@ export default function Home() {
   return (
     <>
       <Title>Inicio | Click Alternativo</Title>
-      <Meta name="description" content="Contenido web curado por humanos con scroll infinito." />
+      <Meta name="description" content="Contenido web curado por humanos." />
 
       <Welcome />
 

@@ -23,8 +23,8 @@ function AppShell(props: { children: any }) {
   return (
     <MetaProvider>
       {/* 1. Iconos del navegador y dispositivos móviles */}
-      <Link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo2.svg" />
-      <Link rel="apple-touch-icon" href="/Logo/MiniLogo2.svg" />
+      <Link rel="icon" type="image/svg+xml" href="./Logo/MiniLogo.svg" />
+      <Link rel="apple-touch-icon" href="./Logo/MiniLogo.svg" />
 
       {/* 2. SEO Estándar en Español */}
       <Title>Click Alternativo | Curaduría de Contenido Humano</Title>
