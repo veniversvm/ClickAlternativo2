@@ -1,0 +1,66 @@
+================================================================================
+          REPORTE DE SISTEMA DE RESPALDO - CLICK ALTERNATIVO 2
+================================================================================
+
+1. OBJETIVO DEL SISTEMA
+-----------------------
+Garantizar la persistencia de datos y la recuperación ante desastres (Disaster 
+Recovery) mediante la automatización de copias de seguridad de la base de datos 
+PostgreSQL y el almacenamiento de imágenes (MinIO/S3), con replicación externa 
+en la nube (Google Drive).
+
+2. COMPONENTES TÉCNICOS
+-----------------------
+- HERRAMIENTA DE REPLICACIÓN: Rclone (configurado para Google Drive).
+- AUTOMATIZACIÓN: Script de Bash (master_backup.sh) con permisos de ejecución 700.
+- PROGRAMACIÓN: Cron Job (Linux Crontab) ejecutándose diariamente a las 4:00 AM.
+- COMPRESIÓN: Algoritmos Gzip (.gz) y Tarball (.tar.gz) para optimizar espacio.
+
+3. FLUJO DE TRABAJO (BACKUP PIPELINE)
+-------------------------------------
+A) Capa de Datos (PostgreSQL):
+   - Se utiliza 'pg_dump' ejecutado desde el contenedor 'click_alt_db'.
+   - Se genera un volcado SQL en caliente (sin detener el servicio).
+   - Resultado: db_backup_YYYY-MM-DD_HH-MM.sql.gz
+
+B) Capa de Archivos (MinIO/S3):
+   - Se comprime directamente el volumen físico de Docker mapeado en el host 
+     (/root/click/ClickAlternativo2/backend/minio_data).
+   - Se preservan metadatos, estructura de buckets y políticas de acceso.
+   - Resultado: s3_backup_YYYY-MM-DD_HH-MM.tar.gz
+
+C) Capa de Replicación (Cloud):
+   - Se asegura la existencia de la jerarquía de carpetas mediante 'rclone mkdir'.
+   - Se sincronizan los archivos locales hacia el remoto 'remote_storage' 
+     usando 'rclone copy'.
+
+4. POLÍTICA DE RETENCIÓN (CLEANUP)
+----------------------------------
+- Retención: 7 días (Rolling window).
+- Nube: 'rclone delete' con el flag '--min-age 7d' para eliminar automáticamente 
+  backups antiguos y evitar saturación de Google Drive.
+- Local: Borrado inmediato tras subida exitosa para mantener el almacenamiento 
+  del VPS de Contabo liberado, con un 'find' de seguridad para archivos huérfanos.
+
+5. ESTRUCTURA EN GOOGLE DRIVE
+-----------------------------
+Organización jerárquica profesional bajo la raíz: 
+[Backups_ClickAlternativo]
+  ├── [db_postgres]  -> Volcados de la base de datos SQL.
+  └── [assets_s3]    -> Imágenes procesadas y assets del sistema.
+
+6. SEGURIDAD Y RESILIENCIA
+--------------------------
+- Aislamiento Off-site: Los datos residen fuera del centro de datos de Contabo.
+- Integridad: El uso de 'pg_dump' y 'tar' asegura que las copias sean 
+  atómicas y consistentes.
+- Notificación Visual: Logs del sistema con emojis para identificación rápida 
+  de errores o éxitos en auditorías manuales.
+
+7. COMANDOS DE MANTENIMIENTO
+----------------------------
+- Ejecución manual: bash /home/admin/backups/master_backup.sh
+- Verificación en nube: rclone ls remote_storage:Backups_ClickAlternativo
+- Logs de ejecución: tail -f /home/admin/backups/backup_log.txt
+
+================================================================================
