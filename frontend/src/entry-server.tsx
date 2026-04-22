@@ -8,7 +8,12 @@ export default createHandler(() => (
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <link rel="icon" href="/favicon.ico" />
+
+          {/* ICONO PARA LA PESTAÑA (Favicon) */}
+          <link rel="icon" type="image/svg+xml" href="/Logo/MiniLogo.svg" />
+
+          {/* ICONO PARA DISPOSITIVOS MÓVILES (Apple/Android) */}
+          <link rel="apple-touch-icon" href="/Logo/MiniLogo.svg" />
           {assets}
         </head>
         <body>

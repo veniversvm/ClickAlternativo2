@@ -10,8 +10,8 @@ export const config = { prerender: false, ssr: true };
 
 export default function CategoryPage() {
   const params = useParams();
-  
-  // 1. UNA SOLA LLAMADA: Consolidamos los datos
+
+  // 1. Petición única
   const data = createAsync(() => blogApi.getPaginated(params.category));
 
   const pageTitle = createMemo(() =>
@@ -21,15 +21,21 @@ export default function CategoryPage() {
   );
 
   return (
-    <Suspense fallback={<div class="page-loader">Cargando sección...</div>}>
+    // El Suspense atrapa el estado 'undefined' de createAsync automáticamente
+    <Suspense fallback={<div class="page-loader">Cargando...</div>}>
       <Show
-        when={data() && data().total > 0}
+        when={data() && data()!.total > 0}
         fallback={
-          // Si no hay resultados para esta categoría, activamos el 404 real
-          <NotFound message={`La sección "${params.category}" no cuenta con curadurías actualmente.`} />
+          /* 
+             Si llegamos aquí es porque data() ya no es undefined (ya cargó) 
+             y el total es 0 o hubo un error.
+          */
+          <NotFound
+            message={`La sección "${params.category}" no cuenta con curadurías actualmente.`}
+          />
         }
       >
-        {/* Solo si la categoría existe, pintamos el SEO y el contenido */}
+        {/* SEO: Solo se inyecta si el 'when' es verdadero */}
         <Title>{pageTitle()} | Click Alternativo</Title>
         <Meta
           name="description"
@@ -44,10 +50,7 @@ export default function CategoryPage() {
             <Search size="small" />
           </header>
 
-          <SearchResults
-            results={data()?.results}
-            error={data()?.error}
-          />
+          <SearchResults results={data()?.results} error={data()?.error} />
         </main>
       </Show>
     </Suspense>
