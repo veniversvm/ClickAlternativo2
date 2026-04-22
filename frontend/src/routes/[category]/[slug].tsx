@@ -1,99 +1,76 @@
-import { createAsync, useParams, A } from "@solidjs/router";
-import { Title, Meta, Link } from "@solidjs/meta";
-import { For, Show, Suspense, createMemo } from "solid-js";
+import { createAsync, useParams } from "@solidjs/router";
+import { Title, Meta } from "@solidjs/meta";
+import { Show, Suspense, createMemo } from "solid-js";
 import { blogApi } from "~/lib/api";
-import Carousel from "~/components/Carousel/Carousel";
-import { marked } from "marked";
+import SearchResults from "~/components/SearchResults/SearchResults";
+import { Search } from "~/components/SearchBar/SearchBar";
 import NotFound from "~/components/Common/NotFound";
-import "~/styles/blogpost.scss";
 
-export default function PostDetailPage() {
+export const config = { prerender: false, ssr: true };
+
+export default function CategoryPage() {
   const params = useParams();
   
-  // 1. Recurso asíncrono
-  const post = createAsync(() => blogApi.getBySlug(params.slug ?? ""));
+  // 1. Cargamos los datos de la categoría
+  const data = createAsync(() => blogApi.getPaginated(params.category));
 
-  // 2. Clasificación de estado (Esto evita el bloqueo de carga infinita)
-  // 'loading' | 'error' | 'success'
-  const postState = createMemo(() => {
-    const data = post();
-    if (data === undefined) return "loading";
-    if (!data || data.error) return "error";
+  // 2. Determinamos el estado de forma explícita para evitar carreras
+  const status = createMemo(() => {
+    const res = data();
+    if (res === undefined) return "loading";
+    // Si no hay resultados o la API dio error, es un 404 real
+    if (!res || res.error || (res.results && res.results.length === 0)) return "404";
     return "success";
   });
 
-  // 3. Memos de datos (solo se ejecutan en estado 'success')
-  const postImages = createMemo(() => {
-    const d = post();
-    if (postState() !== "success") return [];
-    return [d.image_url_1, d.image_url_2, d.image_url_3].filter(Boolean) as string[];
-  });
-
-  const displayUrl = createMemo(() => {
-    try {
-      const url = post()?.content_url;
-      return url ? new URL(url).hostname.replace(/^www\./, "") : "";
-    } catch { return ""; }
-  });
-
-  const renderedContent = createMemo(() => {
-    const content = post()?.content;
-    return content ? marked.parse(content) : "";
-  });
+  const pageTitle = createMemo(() =>
+    params.category
+      ? params.category.charAt(0).toUpperCase() + params.category.slice(1)
+      : ""
+  );
 
   return (
-    // El Suspense maneja el Título global mientras la red está ocupada
-    <Suspense fallback={<Title>Cargando... | Click Alternativo</Title>}>
+    // Ponemos un título de carga en el Suspense para que Google no vea un 404 de entrada
+    <Suspense fallback={<Title>Cargando {pageTitle()}... | Click Alternativo</Title>}>
       
-      <Show when={postState() !== "loading"} fallback={<div class="page-loader">Cargando contenido curado...</div>}>
+      {/* 
+          ESTADO 1: Mientras carga, NO renderizamos el NotFound.
+          Esto evita que el título "404" se cuele en el head.
+      */}
+      <Show 
+        when={status() !== "loading"} 
+        fallback={<div class="page-loader">Buscando en la sección {pageTitle()}...</div>}
+      >
         
+        {/* 
+            ESTADO 2: Si terminó de cargar, decidimos entre Éxito o 404 
+        */}
         <Show 
-          when={postState() === "success"} 
-          fallback={<NotFound message={`La curaduría "${params.slug}" no existe.`} />}
+          when={status() === "success"} 
+          fallback={
+            <NotFound message={`La sección "${params.category}" no cuenta con curadurías actualmente.`} />
+          }
         >
-          {/* --- TODO LO QUE SIGUE SOLO SE RENDERIZA SI HAY ÉXITO --- */}
-          <Title>{post()!.title} | Click Alternativo</Title>
-          <Meta name="description" content={post()!.description} />
-          <Meta property="og:image" content={post()!.image_url_1} />
-          <Link rel="canonical" href={`https://clickalternativo.com/${params.category}/${post()!.slug}`} />
+          {/* SEO: Solo se inyecta cuando estamos 100% seguros de que hay datos */}
+          <Title>{pageTitle()} | Click Alternativo</Title>
+          <Meta
+            name="description"
+            content={`Explora todas las curadurías sobre ${pageTitle()} seleccionadas a mano.`}
+          />
 
-          <article class="blog-post-container">
-            <div class="post-detail-layout">
-              <div class="post-visual-side">
-                <Carousel images={postImages()} />
-                <div class="navigation-wrapper-simple">
-                  <a href={post()!.content_url} target="_blank" rel="noopener noreferrer" class="visit-button-full">
-                    VISITAR {displayUrl().toUpperCase()}
-                  </a>
-                </div>
-              </div>
+          <main class="section-container">
+            <header class="section-header">
+              <h1 class="section-title">
+                Sección: <span>{pageTitle()}</span>
+              </h1>
+              <Search size="small" />
+            </header>
 
-              <div class="post-info-side">
-                <header class="post-header">
-                  <h1 class="post-title">{post()!.title}</h1>
-                </header>
-
-                <div class="post-description-lead">
-                  <p>{post()!.description}</p>
-                </div>
-
-                <div class="post-main-content" innerHTML={renderedContent() as string} />
-
-                <Show when={post()!.categories?.length > 0}>
-                  <div class="tags-section">
-                    <h3 class="tags-title">RELEVANCIA</h3>
-                    <div class="tags-container-flex">
-                      <For each={post()!.categories}>
-                        {(cat) => (
-                          <A href={`/${cat.slug}`} class="tag-pill">{cat.name.toUpperCase()}</A>
-                        )}
-                      </For>
-                    </div>
-                  </div>
-                </Show>
-              </div>
-            </div>
-          </article>
+            <SearchResults
+              results={data()?.results}
+              error={data()?.error}
+            />
+          </main>
         </Show>
       </Show>
     </Suspense>
