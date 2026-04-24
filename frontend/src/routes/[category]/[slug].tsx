@@ -6,6 +6,7 @@ import Carousel from "~/components/Carousel/Carousel";
 import { marked } from "marked";
 import NotFound from "~/components/Common/NotFound";
 import "~/styles/blogpost.scss";
+import { CgKey } from "solid-icons/cg";
 
 export const config = { prerender: false, ssr: true };
 
@@ -45,6 +46,8 @@ export default function PostDetailPage() {
 
     const fullUrl = `https://clickalternativo.com/${params.category}/${d.slug}`;
 
+    console.log(d)
+
     return {
       "@context": "https://schema.org",
       "@graph": [
@@ -53,8 +56,8 @@ export default function PostDetailPage() {
           "headline": d.title,
           "description": d.description,
           "image": postImages(),
-          "datePublished": d.created_at,
-          "dateModified": d.updated_at || d.created_at,
+          "datePublished": d.CretatedAt,
+          "dateModified": d.UpdatedAt || d.CretatedAt,
           "mainEntityOfPage": { "@type": "WebPage", "@id": fullUrl },
           "author": { "@type": "Organization", "name": "Click Alternativo" }
         },
@@ -109,8 +112,8 @@ export default function PostDetailPage() {
                 <header class="post-header">
                   <h1 class="post-title">{post()!.title}</h1>
                   {/* MEJORA 3: Semántica de Fecha con tag <time> */}
-                  <time class="post-date" datetime={post()!.created_at}>
-                    Publicado el {new Date(post()!.created_at).toLocaleDateString("es-ES", {
+                  <time class="post-date" datetime={post()!.CreatedAt}>
+                    Publicado el {new Date(post()!.CreatedAt).toLocaleDateString("es-ES", {
                       day: "numeric", month: "long", year: "numeric"
                     })}
                   </time>
