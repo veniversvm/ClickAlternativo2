@@ -39,6 +39,7 @@ func SetupRoutes(app *fiber.App,
 	api.Get("/categories", categoryHandler.GetAll)
 	api.Get("/entries", entryHandler.GetPaginated)
 	api.Get("/entries/:slug", entryHandler.GetBySlug)
+	api.Get("/sitemap-data", entryHandler.GetSitemapData) // <--- NUEVA RUTA
 
 	// --- RUTAS PROTEGIDAS (USUARIOS REGULARES) ---
 	user := api.Group("/user")

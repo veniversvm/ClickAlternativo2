@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Evitar que Google pierda tiempo en estas rutas
+Disallow: /admin/
+Disallow: /perfil/
+Disallow: /api/v1/
+
+# Ruta al mapa que acabamos de crear
+Sitemap: https://clickalternativo.com/sitemap.xml

@@ -115,6 +115,11 @@ export const blogApi = {
   },
 
   getCategories: () => request("/categories"),
+
+  getSitemapData: async () => {
+    // Esta llamada ocurre mayormente en el servidor (SSR)
+    return await request("/sitemap-data");
+  }
 };
 
 export const authApi = {

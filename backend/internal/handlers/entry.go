@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/veniversvm/ClickAlternativo2/backend/internal/models"
@@ -330,4 +331,33 @@ func (h *EntryHandler) GetByID(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(entry)
+}
+
+/////////////
+/////////////
+/////////////
+
+// GetSitemapData - Retorna solo los datos mínimos para generar el sitemap.xml
+func (h *EntryHandler) GetSitemapData(c *fiber.Ctx) error {
+	type SitemapEntry struct {
+		Slug       string            `json:"slug"`
+		UpdatedAt  time.Time         `json:"updated_at"`
+		Categories []models.Category `gorm:"many2many:entry_categories;" json:"categories"`
+	}
+
+	var results []SitemapEntry
+
+	// Usamos Select para traer solo las columnas indispensables (ahorro de RAM y CPU)
+	err := h.DB.Model(&models.Entry{}).
+		Select("slug", "updated_at").
+		Preload("Categories", func(db *gorm.DB) *gorm.DB {
+			return db.Select("slug") // Solo el slug de la categoría para armar la URL
+		}).
+		Find(&results).Error
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Error al obtener datos para sitemap"})
+	}
+
+	return c.JSON(results)
 }
