@@ -1,4 +1,4 @@
-import { createSignal, ErrorBoundary, Show, Suspense } from "solid-js";
+import { createSignal, ErrorBoundary, onMount, Show, Suspense } from "solid-js";
 import { Link, MetaProvider, Title, Meta } from "@solidjs/meta";
 import { Router, useLocation } from "@solidjs/router"; // Importamos useLocation
 import { FileRoutes } from "@solidjs/start/router";
@@ -19,6 +19,38 @@ function AppShell(props: { children: any }) {
 
   // VITAL: location sirve para avisarle a la transición que la ruta cambió
   const location = useLocation();
+
+  onMount(() => {
+    const logo = `
+       * * *
+     *       *
+    *  ,;;;,  *
+     */;;-;;\\*
+     /;/   \\;\\
+    /);|)-(|;;\\
+   ;;;/ \`"  \\;(;
+   |(|\\_/|\\_/|;|
+   |;|_|/^\\|_|;|
+   |;;\\=:=:=/;)|
+   |:;| : : |;:|
+   |);\\ : : /;;|
+   ;;;| _:_ |;(;
+   \\;;\\  |  /;;/
+    |(;\\   /;;|
+     \\;;| |;;/
+      |;| |;|
+     .'\`-.-''.
+    /   .-.  (\\
+   |   Q   \\__)|
+   '-.__   __.-'
+        \`\`\`
+
+    SANCTA MARIA 
+        ORA
+     PRO NOBIS
+    `;
+    console.log(logo);
+  });
 
   return (
     <MetaProvider>
