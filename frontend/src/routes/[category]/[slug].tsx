@@ -46,7 +46,7 @@ export default function PostDetailPage() {
 
     const fullUrl = `https://clickalternativo.com/${params.category}/${d.slug}`;
 
-    console.log(d)
+    // console.log(d)
 
     return {
       "@context": "https://schema.org",
