@@ -212,22 +212,28 @@ func (h *EntryHandler) GetPaginated(c *fiber.Ctx) error {
 
 // GetBySlug - Búsqueda detallada para la página de la entrada
 func (h *EntryHandler) GetBySlug(c *fiber.Ctx) error {
-	slug := c.Params("slug")
+	slug := strings.ToLower(c.Params("slug")) // Normalizamos a minúsculas
 	var entry models.Entry
 
-	// Buscamos por slug y precargamos las categorías (Preload)
-	// Traemos todos los campos (* por defecto en GORM si no usamos Select)
-	result := h.DB.Preload("Categories").Where("slug = ?", slug).First(&entry)
+	// Usamos LOWER para que 'Windy' y 'windy' encuentren el mismo registro
+	result := h.DB.Preload("Categories").Where("LOWER(slug) = ?", slug).First(&entry)
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return c.Status(404).JSON(fiber.Map{"error": "La entrada no existe"})
+			// Esto ya no imprime el error rojo en la consola, solo devuelve el 404
+			return c.Status(404).JSON(fiber.Map{"error": "La curaduría no existe"})
 		}
-		return c.Status(500).JSON(fiber.Map{"error": "Error al consultar la entrada"})
+		// Otros errores de DB sí los logueamos
+		log.Printf("❌ Error de DB: %v", result.Error)
+		return c.Status(500).JSON(fiber.Map{"error": "Error interno del servidor"})
 	}
 
 	return c.JSON(entry)
 }
+
+/////////////
+/////////////
+/////////////
 
 func (h *EntryHandler) Update(c *fiber.Ctx) error {
 	id := c.Params("id")
